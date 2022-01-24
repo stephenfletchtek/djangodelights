@@ -1,0 +1,13 @@
+asgiref==3.4.1
+certifi==2021.10.8
+charset-normalizer==2.0.7
+Django==3.2.9
+greenlet==1.1.2
+idna==3.3
+peewee==3.14.4
+pyperclip==1.8.2
+pytz==2021.3
+requests==2.26.0
+SQLAlchemy==1.4.26
+sqlparse==0.4.2
+urllib3==1.26.7
