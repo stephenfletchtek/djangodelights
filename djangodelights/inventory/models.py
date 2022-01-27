@@ -6,12 +6,12 @@ class Ingredient(models.Model):
         ordering = ['name']
 
     name = models.CharField(unique=True, max_length=200)
-    quantity = models.IntegerField(unique=False, blank=True, max_length=10)
+    quantity = models.IntegerField(unique=False, blank=True)
     unit = models.CharField(unique=False, blank=True, max_length=10)
     unit_price = models.DecimalField(unique=False, blank=True, max_digits=6, decimal_places=3)
     kanban = models.BooleanField(default=False)
-    threshold = models.IntegerField(unique=False, blank=True, max_length=10)
-    re_order = models.IntegerField(unique=False, blank=True, max_length=10)
+    threshold = models.IntegerField(unique=False, blank=True)
+    re_order = models.IntegerField(unique=False, blank=True)
 
     def get_absolute_url(self):
         return '/ingredients'
@@ -26,7 +26,7 @@ class MenuItem(models.Model):
 
     title = models.CharField(unique=True, max_length=200)
     price = models.DecimalField(unique=False, blank=True, max_digits=6, decimal_places=2)
-    made_stock = models.IntegerField(unique=False, blank=True, max_length=10)
+    made_stock = models.IntegerField(unique=False, blank=True)
 
     def get_absolute_url(self):
         return '/menu'
@@ -57,7 +57,7 @@ class Purchase(models.Model):
 
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(unique=False)
-    quantity = models.IntegerField(unique=False, blank=True, max_length=10)
+    quantity = models.IntegerField(unique=False, blank=True)
 
     def get_absolute_url(self):
         return '/purchase'
