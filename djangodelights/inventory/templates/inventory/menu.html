@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+{% block content %}
+<div>
+  <h2>Menu</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Dish</th>
+        <th>Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for menuitem in object_list %}
+        <tr>
+          <td>
+            {{ menuitem.title }}
+            {% comment %}
+            <a href="{% url 'update_station' station.id %}">{{ menuitem.title }}</a>
+            {% endcomment %}
+          </td>
+
+          <td>£{{ menuitem.price }}</td>
+
+          <td>
+            ❌
+            {% comment %}
+            <a class="delete-button" href="{% url 'delete_station' station.id %}">❌</a>
+            {% endcomment %}
+          </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% comment %}
+  <a class="add-button" href="{% url 'create_station' %}">➕</a>
+  {% endcomment %}
+</div>
+{% endblock %}
