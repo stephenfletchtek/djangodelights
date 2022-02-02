@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+{% block content %}
+<div>
+  <h2>Reports</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Revenue from all orders</td>
+        <td>£ {{ object_list }}</td>
+      </tr>
+      <tr>
+        <td>Cost of all orders</td>
+        <td>£ {{ orders }}</td>
+      </tr>
+      <tr>
+        <td>PROFIT</td>
+        <td>£ {{ profit }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
