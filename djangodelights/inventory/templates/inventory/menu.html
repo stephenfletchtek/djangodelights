@@ -3,39 +3,35 @@
 {% block title %}Django Delights{% endblock %}
 {% block content %}
 <div>
-  <h2>Menu</h2>
+  <h2>Edit Menu</h2>
   <table>
     <thead>
       <tr>
         <th>Dish</th>
         <th>Price</th>
-        <th>Actions</th>
+        <th>Recipe</th>
+        <th>Remove</th>
       </tr>
     </thead>
     <tbody>
-    {% for menuitem in object_list %}
-        <tr>
-          <td>
-            {{ menuitem.title }}
-            {% comment %}
-            <a href="{% url 'update_station' station.id %}">{{ menuitem.title }}</a>
-            {% endcomment %}
-          </td>
-
-          <td>£{{ menuitem.price }}</td>
-
-          <td>
-            ❌
-            {% comment %}
-            <a class="delete-button" href="{% url 'delete_station' station.id %}">❌</a>
-            {% endcomment %}
-          </td>
-        </tr>
-    {% endfor %}
+      {% for menuitem in object_list %}
+          <tr>
+            <td>
+              <a href="{% url 'update_menu_name' menuitem.id %}">{{ menuitem.title }}</a>
+            </td>
+            <td>
+              <a href="{% url 'update_menu_price' menuitem.id %}">£{{ menuitem.price }}</a>
+            </td>
+            <td>
+              <a href="{% url 'recipe_view' menuitem.title %}"><button>Recipe</button></a>
+            </td>
+            <td>
+              <a class="delete-button" href="{% url 'delete_menu' menuitem.id %}">❌</a>
+            </td>
+          </tr>
+      {% endfor %}
     </tbody>
   </table>
-  {% comment %}
-  <a class="add-button" href="{% url 'create_station' %}">➕</a>
-  {% endcomment %}
+  <a class="add-button" href="{% url 'create_menu' %}">➕</a>
 </div>
 {% endblock %}

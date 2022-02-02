@@ -29,7 +29,10 @@
       </div>
       <nav class="navbar">
           <a href="{% url 'home' %}" {% if request.path == '/' %} class="current-page" {% endif %}>Home</a>
+          <a href="{% url 'ingredients' %}" {% if 'ingredients' in request.path %} class="current=page" {% endif %}>Ingredients</a>
           <a href="{% url 'menu' %}" {% if 'menu' in request.path %} class="current-page" {% endif %}>Menu</a>
+          <a href="{% url 'purchases' %}" {% if 'purchases' in request.path %} class="current-page" {% endif %}>Purchases</a>
+          <a href="{% url 'report' %}" {% if 'report' in request.path %} class="current-page" {% endif %}>Reports</a>
       </nav>
     </header>
     <main>{% block content %}{% endblock %}</main>

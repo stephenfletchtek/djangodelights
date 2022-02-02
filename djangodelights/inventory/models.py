@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from django.urls import reverse
 
 
 class Ingredient(models.Model):
@@ -26,7 +28,7 @@ class MenuItem(models.Model):
 
     title = models.CharField(unique=True, max_length=200)
     price = models.DecimalField(unique=False, blank=True, max_digits=6, decimal_places=2)
-    made_stock = models.IntegerField(unique=False, blank=True)
+    made_stock = models.IntegerField(unique=False, blank=True, null=True)
 
     def get_absolute_url(self):
         return '/menu'
@@ -36,6 +38,7 @@ class MenuItem(models.Model):
 
 
 class Recipe(models.Model):
+
     class Meta:
         unique_together = ['menu_item', 'ingredient']
         ordering = ['menu_item', 'ingredient']
@@ -45,7 +48,8 @@ class Recipe(models.Model):
     quantity = models.DecimalField(unique=False, blank=True, max_digits=10, decimal_places=3)
 
     def get_absolute_url(self):
-        return '/recipe'
+        # this gets the currently selected menu item
+        return reverse('recipe_view', args=[str(self.menu_item.title)])
 
     def __str__(self):
         return f'{self.menu_item} -- {self.ingredient}'
@@ -56,11 +60,12 @@ class Purchase(models.Model):
         ordering = ['timestamp']
 
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(unique=False)
+    timestamp = models.DateTimeField(unique=False, default=timezone.now)
+    # timestamp = models.DateTimeField(unique=False, default=datetime.datetime.today())
     quantity = models.IntegerField(unique=False, blank=True)
 
     def get_absolute_url(self):
-        return '/purchase'
+        return '/purchases'
 
     def __str__(self):
         return f'{self.menu_item}'

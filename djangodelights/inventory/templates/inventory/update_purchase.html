@@ -1,0 +1,9 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<h2>Update {{ object }} Purchase</h2>
+<p>Purchase Timestamp: {{ object.timestamp }}</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form }}
+  <input type="submit" value="Update" />
+</form>
+{% endblock %}
