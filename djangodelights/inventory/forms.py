@@ -64,22 +64,12 @@ class RecipeAddForm(forms.ModelForm):
         model = Recipe
         fields = ["ingredient", "quantity"]
 
-    def __init__(self, instance=None, **kwargs):
-
-        # recipe kwarg passed from view
-        recipe = kwargs.pop('recipe')
-        recipe_objs = Recipe.objects.all()
-        in_recipe = recipe_objs.filter(menu_item__title=recipe)
-
-        excludes = []
-        for item in in_recipe:
-            excludes.append(item.ingredient.name)
-
-        ingredients = Ingredient.objects.all()
-        ingredients = ingredients.exclude(name__in=excludes)
-
-        super().__init__(**kwargs)
+    def __init__(self, recipe=None, **kwargs):
         # only list ingredients not already in the recipe
+        in_recipe = Recipe.objects.filter(menu_item__title=recipe)
+        excludes = in_recipe.values_list('ingredient__name', flat=True)
+        ingredients = Ingredient.objects.exclude(name__in=excludes)
+        super().__init__(**kwargs)
         self.fields['ingredient'].queryset = ingredients
 
 
