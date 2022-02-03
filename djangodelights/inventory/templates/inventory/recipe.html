@@ -11,7 +11,7 @@
         <th>Quantity</th>
         <th>Unit</th>
         <th>Unit Price</th>
-        <th>Actions</th>
+        <th>Remove</th>
       </tr>
     </thead>
     <tbody>
@@ -21,7 +21,7 @@
               {{ item.ingredient.name }}
             </td>
             <td>
-              {{ item.quantity }}
+              <a href="{% url 'update_recipe' item.id %}">{{ item.quantity }}</a>
             </td>
             <td>
               {{ item.ingredient.unit }}
@@ -30,7 +30,6 @@
               £ {{ item.ingredient.unit_price }}
             </td>
             <td>
-              <a href="{% url 'update_recipe' item.id %}"><button>Edit</button></a>
               <a class="delete-button" href="{% url 'delete_recipe' item.id %}">❌</a>
             </td>
           </tr>

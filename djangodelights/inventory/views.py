@@ -17,8 +17,6 @@ class HomeView(TemplateView):
   def get_context_data(self):
     context = super().get_context_data()
     context["menu"] = MenuItem.objects.all()
-    context["ingredients"] = Ingredient.objects.all()
-    context["recipes"] = Recipe.objects.all()
     return context
 
 
@@ -49,6 +47,15 @@ class DeleteIngredientView(DeleteView):
   model = Ingredient
   template_name = 'inventory/delete_ingredient.html'
   success_url = '/ingredients'
+
+
+class InvetoryView(ListView):
+    model = Ingredient
+    template_name = 'inventory/inventory.html'
+
+    # ingredients in stock
+    def get_queryset(self):
+        return Ingredient.objects.filter(quantity__gt=0)
 
 
 class MenuView(ListView):
@@ -86,21 +93,59 @@ class PurchaseView(ListView):
 
 
 class CreatePurchaseView(CreateView):
-  model = Purchase
-  template_name = 'inventory/add_purchase.html'
-  form_class = PurchaseAddForm
+    model = Purchase
+    template_name = 'inventory/add_purchase.html'
+    form_class = PurchaseAddForm
+
+    def form_valid(self, form):
+        # decrease stock when purchase is added
+        order_quantity = form.instance.quantity
+        menu_item = form.instance.menu_item
+        recipe = menu_item.recipe_set.filter(menu_item=menu_item)
+
+        for recipe_obj in recipe:
+            pk = recipe_obj.ingredient.pk
+            quantity = F('quantity') - recipe_obj.quantity * order_quantity
+            Ingredient.objects.filter(pk=pk).update(quantity=quantity)
+
+        return super().form_valid(form)
 
 
 class UpdatePurchaseView(UpdateView):
-  model = Purchase
-  template_name = 'inventory/update_purchase.html'
-  form_class = PurchaseEditForm
+    model = Purchase
+    template_name = 'inventory/update_purchase.html'
+    form_class = PurchaseEditForm
+
+    def form_valid(self, form):
+        # adjust stock up or down by difference between form and model
+        order = self.get_object()
+        recipe = order.menu_item.recipe_set.filter(menu_item=order.menu_item)
+        delta = order.quantity - form.instance.quantity
+
+        for recipe_obj in recipe:
+            pk = recipe_obj.ingredient.pk
+            quantity = F('quantity') + recipe_obj.quantity * delta
+            Ingredient.objects.filter(pk=pk).update(quantity=quantity)
+
+        return super().form_valid(form)
 
 
 class DeletePurchaseView(DeleteView):
-  model = Purchase
-  template_name = 'inventory/delete_purchase.html'
-  success_url = '/purchases'
+    model = Purchase
+    template_name = 'inventory/delete_purchase.html'
+    success_url = '/purchases'
+
+    def delete(self, *args, **kwargs):
+        # increase stock if purchase is deleted
+        order = self.get_object()
+        recipe = order.menu_item.recipe_set.filter(menu_item=order.menu_item)
+
+        for recipe_obj in recipe:
+            pk = recipe_obj.ingredient.pk
+            quantity = F('quantity') + recipe_obj.quantity * order.quantity
+            Ingredient.objects.filter(pk=pk).update(quantity=quantity)
+
+        return super().delete(*args, **kwargs)
 
 
 class RecipeView(ListView):
@@ -109,8 +154,7 @@ class RecipeView(ListView):
 
     def get_queryset(self):
         self.menu_item = get_object_or_404(MenuItem, title=self.kwargs['recipe'])
-        result = Recipe.objects.filter(menu_item__title=self.menu_item)
-        return result
+        return Recipe.objects.filter(menu_item__title=self.menu_item)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -133,9 +177,8 @@ class CreateRecipeView(CreateView):
 
     # put recipe into form kwargs
     def get_form_kwargs(self):
-        kwargs = super(CreateRecipeView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs.update({'recipe': self.kwargs['recipe']})
-        kwargs.update(self.kwargs)
         return kwargs
 
     # put recipe into context
@@ -170,25 +213,27 @@ class ReportView(ListView):
         # messy way to get cost of all orders
         self.orders_cost = 0
 
+        # menu items actually purchased
         purchases = Purchase.objects.order_by()
         purchases = purchases.values_list('menu_item__title', flat=True)
         purchases = purchases.distinct()
 
         for item in purchases:
+            # number of orders
             orders = Purchase.objects.filter(menu_item__title=item)
             orders = orders.aggregate(total=Sum('quantity'))['total']
-
+            # dish cost
             dish_cost = Recipe.objects.filter(menu_item__title=item)
-            expression = Sum(F('ingredient__unit_price') * F('quantity'))
-            dish_cost = dish_cost.aggregate(total=expression)['total']
+            total = Sum(F('ingredient__unit_price') * F('quantity'))
+            dish_cost = dish_cost.aggregate(total=total)['total']
 
             self.orders_cost += orders * dish_cost
 
-        result = Purchase.objects.all()
-        purchase_expression = Sum(F('menu_item__price') * F('quantity'))
-        result = result.aggregate(total=purchase_expression)['total']
-        self.profit = result - self.orders_cost
-        return result
+        revenue = Purchase.objects.all()
+        total = Sum(F('menu_item__price') * F('quantity'))
+        revenue = revenue.aggregate(total=total)['total']
+        self.profit = revenue - self.orders_cost
+        return revenue
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

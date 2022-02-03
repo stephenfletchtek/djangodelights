@@ -3,35 +3,31 @@
 {% block title %}Django Delights{% endblock %}
 {% block content %}
 <div>
-  <h2>Ingredients</h2>
+  <h2>Ingredients in Stock</h2>
   <table>
     <thead>
       <tr>
         <th>Item</th>
         <th>Quantity</th>
         <th>Unit of measure</th>
-        <th>Remove</th>
       </tr>
     </thead>
     <tbody>
       {% for item in object_list %}
           <tr>
             <td>
-              <a href="{% url 'update_ingredients' item.id %}">{{ item.name }}<a>
+              {{ item.name }}
             </td>
             <td>
-              <a href="{% url 'update_stock' item.id %}">{{ item.quantity }}</a>
+              {{ item.quantity }}
             </td>
             <td>
               {{ item.unit}}
-            </td>
-            <td>
-              <a class="delete-button" href="{% url 'delete_ingredients' item.id %}">❌</a>
             </td>
           </tr>
       {% endfor %}
     </tbody>
   </table>
-  <a class="add-button" href="{% url 'create_ingredients' %}">➕</a>
+  <a class="add-button" href="{% url 'create_ingredients' %}">Restock</a>
 </div>
 {% endblock %}
