@@ -14,19 +14,19 @@
       </tr>
     </thead>
     <tbody>
-      {% for menuitem in object_list %}
+      {% for menu_item in object_list %}
           <tr>
             <td>
-              <a href="{% url 'update_menu_name' menuitem.id %}">{{ menuitem.title }}</a>
+              <a href="{% url 'update_menu_name' menu_item.id %}">{{ menu_item.title }}</a>
             </td>
             <td>
-              <a href="{% url 'update_menu_price' menuitem.id %}">£{{ menuitem.price }}</a>
+              <a href="{% url 'update_menu_price' menu_item.id %}">£{{ menu_item.price }}</a>
             </td>
             <td>
-              <a href="{% url 'recipe_view' menuitem.title %}"><button>Recipe</button></a>
+              <a href="{% url 'recipe_view' menu_item.title %}"><button>Recipe</button></a>
             </td>
             <td>
-              <a class="delete-button" href="{% url 'delete_menu' menuitem.id %}">❌</a>
+              <a class="delete-button" href="{% url 'delete_menu' menu_item.id %}">❌</a>
             </td>
           </tr>
       {% endfor %}

@@ -2,7 +2,12 @@
 <h2>Delete Purchase</h2>
 <form method="post">
   {% csrf_token %}
-  <p>Are you sure you want to delete "{{ object }}"?</p>
+  <p>Are you sure you want to delete "{{ object.menu_item.title }}"</p>
+  <p>Timestamp: "{{ object.timestamp }}"?</p>
+  <div class="restock">
+    <input class="restock-input" type="checkbox" value="True" id="restock" name="restock">
+    <label class="restock-label" for="restock">Restock on delete</label>
+  </div>
   <input type="submit" value="Confirm" />
 </form>
 {% endblock %}

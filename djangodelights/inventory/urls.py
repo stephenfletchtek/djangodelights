@@ -1,9 +1,12 @@
-from django.urls import path
+from django.urls import path, include
 
 from . import views
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
+    path("account/", include("django.contrib.auth.urls")),
+    path("signup/", views.SignUp.as_view(), name="signup"),
+    path("logout/", views.LogoutView.as_view(), name="logout"),
     path('ingredients/', views.IngredientView.as_view(), name='ingredients'),
     path('ingredients/new/', views.CreateIngredientView.as_view(), name='create_ingredients'),
     path('ingredients/<pk>/update/', views.UpdateIngredientView.as_view(), name='update_ingredients'),
@@ -19,8 +22,8 @@ urlpatterns = [
     path('purchases/new/', views.CreatePurchaseView.as_view(), name='create_purchases'),
     path('purchases/<pk>/update/', views.UpdatePurchaseView.as_view(), name='update_purchases'),
     path('purchases/<pk>/delete/', views.DeletePurchaseView.as_view(), name='delete_purchases'),
-    path('menu/recipe/<recipe>/', views.RecipeView.as_view(), name='recipe_view'),
-    path('menu/recipe/<recipe>/new/', views.CreateRecipeView.as_view(), name='create_recipe'),
+    path('menu/recipe/<menu_item>/', views.RecipeView.as_view(), name='recipe_view'),
+    path('menu/recipe/<menu_item>/new/', views.CreateRecipeView.as_view(), name='create_recipe'),
     path('menu/recipe/<pk>/update/', views.UpdateRecipeView.as_view(), name='update_recipe'),
     path('menu/recipe/<pk>/delete/', views.DeleteRecipeView.as_view(), name='delete_recipe'),
     path('reports/', views.ReportView.as_view(), name='report'),

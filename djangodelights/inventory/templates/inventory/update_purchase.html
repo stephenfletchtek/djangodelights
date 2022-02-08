@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
-<h2>Update {{ object }} Purchase</h2>
+<h2>Update Purchase: {{ object.menu_item.title }}</h2>
 <p>Purchase Timestamp: {{ object.timestamp }}</p>
 <form method="post">
   {% csrf_token %}
