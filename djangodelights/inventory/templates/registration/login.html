@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'inventory/login.css' %}">
+<div class="login-form">
+  <h2>Please login</h2>
+  <form class="login" method="post">
+      <div>
+        {% csrf_token %}
+        <table>{{ form.as_table }}</table>
+      <input type="submit" value="Login"/>
+    </div>
+  </form>
+</div>
+{% endblock %}

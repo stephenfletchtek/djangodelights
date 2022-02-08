@@ -3,7 +3,7 @@
 {% block title %}Django Delights{% endblock %}
 {% block content %}
 <div>
-  <h2>Recipe for {{ menu_recipe }}</h2>
+  <h2>Recipe for {{ menu_item.title }}</h2>
   <table>
     <thead>
       <tr>
@@ -36,6 +36,6 @@
       {% endfor %}
     </tbody>
   </table>
-  <a class="add-button" href="{% url 'create_recipe' menu_recipe %}">➕</a>
+  <a class="add-button" href="{% url 'create_recipe' menu_item.title %}">➕</a>
 </div>
 {% endblock %}
