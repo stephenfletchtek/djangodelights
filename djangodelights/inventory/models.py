@@ -1,10 +1,19 @@
 import math
 
+from decimal import Decimal
+
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import F, Sum
 from django.utils import timezone
 from django.urls import reverse
+
+
+class Category(models.Model):
+    category = models.CharField(unique=True, max_length=200)
+
+    def __str__(self):
+        return self.category
 
 
 class Ingredient(models.Model):
@@ -32,15 +41,20 @@ class MenuItem(models.Model):
     class Meta:
         ordering = ['title']
 
+
     title = models.CharField(unique=True, max_length=200)
     price = models.DecimalField(max_digits=6, decimal_places=2)
-    made_stock = models.IntegerField(blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    # whether to display the menuitem in user interface
+    display = models.BooleanField(default=True)
+    # rich description of the dish
+    description = models.TextField(blank=True, null=True)
 
     # Takes a menu_item object
     # Returns how many of the dish can be made from stock
-    def available(self, menu_item):
+    def available(self):
         try:
-            recipe = menu_item.recipe_set.all()
+            recipe = self.recipe_set.all()
             expression = F('ingredient__quantity') / F('quantity')
             result = math.floor(min(recipe.values_list(expression, flat=True)))
         except:
@@ -49,10 +63,10 @@ class MenuItem(models.Model):
 
     # Adjusts stock of ingredients of menu_item object
     # Delta is an integer: positive increases stock
-    def adjust_stock(self, menu_item, delta):
+    def adjust_stock(self, delta):
         delta = delta or 0
         try:
-            recipe = menu_item.recipe_set.all()
+            recipe = self.recipe_set.all()
             for item in recipe:
                 pk = item.ingredient.pk
                 quantity = F('quantity') + item.quantity * delta
@@ -61,21 +75,29 @@ class MenuItem(models.Model):
         except:
             return False
 
-    # Takes a menu_item object and returns cost of all ingredients
-    def dish_cost(self, menu_item):
+    # Returns cost of ingredients for a particular menu_item
+    def dish_cost(self):
         try:
-            ingredients = menu_item.recipe_set.all()
+            ingredients = self.recipe_set.all()
             total = Sum(F('ingredient__unit_price') * F('quantity'))
             result = ingredients.aggregate(total=total)['total']
         except:
             result = 0
         return result
 
+    # Returns profit for a particular menu_item (called from template)
+    def dish_profit(self):
+        try:
+            profit = (self.price - self.dish_cost()).quantize(Decimal('0.01'))
+        except:
+            profit = 0
+        return profit
+
     def get_absolute_url(self):
         return '/menu'
 
     def __str__(self):
-        available = self.available(self)
+        available = self.available()
         return f'{self.title} -- {available} available'
 
 

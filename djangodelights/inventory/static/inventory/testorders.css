@@ -1,0 +1,118 @@
+/* =================================
+  Base Element Styles
+==================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+a:active {
+    color: black;
+}
+a:visited {
+    color:black;
+}
+
+body {
+	line-height: 1.6;
+  background: #e5e3e3;
+  border-top: 9px solid black;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  color: white;
+  background: #3C81B4;
+  margin: 0;
+  padding: 0.4em;
+  text-align: center;
+}
+
+table {
+  background: #e5e3e3;
+  text-align: left;
+  width: 100%;
+}
+
+table tr :first-child {
+  padding-left: 1em;
+}
+
+table tr :last-child {
+  text-align: center;
+}
+
+th {
+  padding: 0.5em;
+}
+
+td {
+  background: #099f46;
+  color: white;
+  padding: 0.5em;
+}
+
+tr {
+  border-top: 1px solid #e5e3e3;
+  border-bottom: 1px solid #e5e3e3;
+}
+
+/* =========================
+Base layout styles
+============================ */
+
+.add {
+  background: white;
+  text-align: right;
+}
+
+.addbutton {
+  border: none;
+  background: #c4c4c4;
+  padding: 0.2em 1.4em 0.2em 1.4em;
+}
+
+.container {
+  background: white;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.detail {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+/* Top navbar as flex */
+.nav {
+  background: white;
+  display: flex;
+  padding-bottom: 0.3em;
+  padding-top: 0.5em;
+  vertical-align: bottom;
+  width: 100%
+}
+
+.nav a {
+  color: black;
+  text-decoration: none;
+  /* makes whole item clickable */
+  display: block;
+}
+
+/* Send settings to right */
+.nav > :nth-child(2) {
+  margin-right: auto;
+}
+
+/* Space word 'home' and 'settings' */
+.nav > :nth-child(even) {
+  padding-left: 2%;
+}
+
+
+/* =================================
+  Media Queries
+==================================== */

@@ -1,6 +1,7 @@
 from django import forms, template
 
 from django.core.exceptions import ValidationError
+from django.forms import modelformset_factory
 
 from .models import Ingredient, MenuItem, Recipe, Purchase
 
@@ -22,6 +23,20 @@ class IngredientStockForm(forms.ModelForm):
     class Meta:
         model = Ingredient
         fields = ['quantity']
+
+
+class MenuSelectForm(forms.ModelForm):
+    class Meta:
+        model = MenuItem
+        fields = ['display']
+
+    # makes it auto validate on tick box
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
+
+
+DisplayFormset = modelformset_factory(MenuItem, fields=('display',), extra=0)
 
 
 # used to add menu item
@@ -56,7 +71,7 @@ class PurchaseAddForm(forms.ModelForm):
         self.menu = MenuItem.objects.all()
         super().__init__(**kwargs)
         menu = MenuItem.objects.all()
-        filter_list = [item.title for item in menu if item.available(item) > 0]
+        filter_list = [item.title for item in menu if item.available() > 0]
         in_stock = MenuItem.objects.filter(title__in=filter_list)
         self.fields['menu_item'].queryset = in_stock
 
@@ -64,7 +79,7 @@ class PurchaseAddForm(forms.ModelForm):
     def clean_quantity(self):
         data = self.cleaned_data['quantity']
         menu_item = self.cleaned_data['menu_item']
-        available = menu_item.available(menu_item)
+        available = menu_item.available()
 
         if data > available:
             message = f'Only {available} of these are available'
@@ -83,7 +98,7 @@ class PurchaseEditForm(forms.ModelForm):
     def clean_quantity(self):
         data = self.cleaned_data['quantity']
         menu_item = self.instance.menu_item
-        available = menu_item.available(menu_item)
+        available = menu_item.available()
         orig_qty = self.instance.quantity
         delta = data - orig_qty
         if delta > available:

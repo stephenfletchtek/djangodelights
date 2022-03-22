@@ -1,0 +1,129 @@
+/* =================================
+  Base Element Styles
+==================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+a:active {
+    color: black;
+}
+a:visited {
+    color:black;
+}
+
+article {
+  background: white;
+  padding: 1.5em;
+}
+
+body {
+	line-height: 1.6;
+  background: #e5e3e3;
+  border-top: 9px solid black;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  color: white;
+  background: #3C81B4;
+  margin: 0;
+  padding: 0.4em;
+  text-align: center;
+}
+
+h2 {
+  background: #e5e3e3;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+
+/* Make the flex container fill remainder of height */
+section {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 150px);
+}
+
+/* This makes the last article fill the section */
+section > article:last-child {
+  flex-grow: 1;
+}
+
+/* =========================
+Base layout styles
+============================ */
+
+.breadcrumb ul {
+  background: white;
+  display: flex;
+  flex-direction: row;
+  padding: 0.2em 1.5em 1em 1.5em;
+}
+
+.breadcrumb li + li::before {
+  content: "\00a0>\00a0";
+}
+
+.container {
+  background: white;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.detail {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.exclamation {
+  background: red;
+  border-radius: 1em;
+  color: white;
+  font-size: .8em;
+  height: 2em;
+  line-height: normal;
+  padding: .5em;
+  text-align: center;
+  width: 2em;
+}
+
+.info{
+  background: black;
+  border-radius: 1em;
+  color: white;
+  font-size: .8em;
+  height: 2em;
+  line-height: normal;
+  padding: .5em;
+  text-align: center;
+  width: 2em;
+}
+
+/* Top navbar as flex */
+.nav {
+  background: white;
+  display: flex;
+  padding-bottom: 0.3em;
+  padding-top: 0.5em;
+  vertical-align: bottom;
+  width: 100%
+}
+
+/* Send settings to right */
+.nav > :nth-child(2) {
+  margin-right: auto;
+}
+
+/* Space word 'home' and 'settings' */
+.nav > :nth-child(even) {
+  padding-left: 2%;
+}
+
+
+/* =================================
+  Media Queries
+==================================== */

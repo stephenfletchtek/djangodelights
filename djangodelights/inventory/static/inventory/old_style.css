@@ -1,0 +1,271 @@
+/* ****************************** */
+/* *** ENTIRE PAGE IS IN BODY *** */
+/* ****************************** */
+body {
+  font-family: "Oxygen", sans-serif;
+  margin: 0;
+  /* lines below originally in .app div tag just inside body */
+  min-width: 800px;
+  max-width: 60%;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* horizontal rule is not implemented */
+/* hr {
+  margin: 30px 0;
+} */
+
+/* ********************** */
+/* *** HEADER CONTENT *** */
+/* ********************** */
+header {
+  background-color: #fff5ff;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 40px;
+  padding-top: 40px;
+}
+
+.header-first-row {
+  width: 100%;
+  display: flex;
+}
+
+.title {
+  font-size: 3em;
+  padding: 0px 50px 0 20px;
+  margin: auto 0;
+  color: #3a10e5;
+}
+
+.navbar {
+  margin-top: 50px;
+  display: flex;
+  width: 100%;
+}
+
+/* send some nav items over to the right */
+.navbar > :nth-child(4) {
+  margin-right: auto;
+}
+
+.navbar a {
+  text-decoration: none;
+  padding: 8px 0;
+  color: #1557ff;
+  margin-right: 15px;
+}
+
+/* .current-page was not implemented depsite being in the CSS */
+.navbar a:hover,
+.navbar .current-page {
+  border-bottom: solid 4px #1557ff;
+  border-spacing: 0 15px;
+  font-weight: bold;
+}
+
+.header-greet {
+  width: 100%;
+}
+
+.logout-button {
+  position: absolute;
+  top: 100px;
+  right: 15px;
+  display: block;
+  width: 80px;
+  height: 15px;
+  background: #3A10E5;
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  line-height: 15px;
+  text-decoration: none;
+}
+
+/* ************************** */
+/* *** STYLE MAIN CONTENT *** */
+/* ************************** */
+main {
+  padding: 40px;
+}
+
+main h2 {
+  font-size: 2em;
+}
+
+/* The table on any of the pages */
+main table {
+  text-align: left;
+  border-collapse: separate;
+  border-spacing: 0 15px;
+  width: 100%;
+}
+
+/* table header */
+main table th {
+  text-align: left;
+  border-collapse: separate;
+  border-spacing: 0 15px;
+  text-decoration: underline;
+}
+
+/* text of lines */
+a {
+  text-decoration: none;
+  color: #1557ff;
+}
+a:hover {
+  font-weight: bold;
+}
+
+/* no bullets on list */
+ul {
+  list-style: none;
+}
+
+/* ************************ */
+/* *** line tables only *** */
+/* ************************ */
+
+/* the list itself is side-by-side */
+.line-table li {
+  display: inline-block;
+}
+
+/* the stop blobs */
+.stop {
+  width: 2em;
+  height: 2em;
+  text-align: center;
+  line-height: 2em;
+  border-radius: 1em;
+  background: dodgerblue;
+  margin: 0 1em;
+  color: white;
+}
+
+/* the station names */
+.station {
+  background-color: white;
+  padding: 5px;
+  margin-left: 0px;
+  font-size: 0.8em;
+  color: dodgerblue;
+  border: 2px dashed lightblue;
+  border-radius: 5px;
+  76font-weight: bold;
+}
+
+.stop,
+.station {
+  position: relative; /* this makes the lines after the blobs work */
+}
+
+/* space first column on trains page */
+/* margin setting above causes this column to crowd */
+.col-one {
+  padding-right: 15px;
+}
+
+/* lines after each blob */
+.stop::after,
+.station::after {
+  content: "";
+  position: absolute;
+  top: 0.9em;
+  /* left: -4em; */
+  width: 4em;
+  height: 0.2em;
+  background: dodgerblue;
+  z-index: -1;
+}
+
+.station::after{
+  height: 0.25em; /* thicken up line a bit */
+}
+
+/* no line after last blob */
+.line-table li:last-child .stop::after,
+.line-table li:last-child .station::after {
+  display: none;
+}
+
+/* pull the stops closer to the line names */
+.line-table ul {
+  padding: 0;
+}
+
+/* hide station name */
+.station {
+  display: none;
+}
+
+/* hide stop when hovering */
+.stop:hover {
+    display: none;
+    background-color: lightblue;
+}
+
+/* show station name when hovering */
+.station:hover + .station {
+    display: inline-block;
+}
+
+/* ************* */
+/* *** FORMS *** */
+/* ************* */
+
+/* input box and dropdown box of add/update */
+input,
+select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid black;
+  border-radius: 3px;
+}
+
+/* submit button length to match its text */
+main form input[type="submit"] {
+  width: max-content;
+}
+
+main form * {
+  display: block;
+}
+
+/* field labels on form */
+main form label {
+  font-size: 1em;
+  font-weight: bold;
+  padding-top: 20px;
+}
+
+/* *************** */
+/* *** BUTTONS *** */
+/* *************** */
+
+/* green add button */
+.add-button {
+  display: inherit; /* most likely inherits 'block' to set width */
+  text-align: center;
+  border-radius: 15px;
+  text-decoration: none;
+  color: inherit; /* would colour text, but large '+' doesn't take colour */
+  padding: 4px;
+  background-color: lightgreen;
+}
+
+/* red X delete button */
+.delete-button {
+  text-decoration: none;
+  color: inherit;
+}
