@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <h1>Recipes</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="add">
+      <p>All recipes</p>
+      <input class="addbutton" type="submit" value="Update" />
+    </div>
+
+    {{ form.management_form }}
+    <table class="menu-table">
+      <thead class="heading">
+        <tr>
+          <th><h2>Starters</h2></th>
+          <th>Profit</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Display</th>
+        </tr>
+      </thead>
+
+      {% for item in form %}
+        {{ item.id }}
+        {% if item.instance.category.category == "Starters" %}
+          <tbody>
+            <td><a href="{% url 'recipe_view' item.instance.title %}">{{ item.instance.title }}</a></td>
+            <td>{{ item.instance.dish_profit }}</td>
+            <td>{{ item.instance.price }}</td>
+            <td>{{ item.instance.available }}</td>
+            <td>{{ item.display }}</td>
+          </tbody>
+        {% endif %}
+      {% endfor %}
+
+      <thead class="heading">
+        <tr>
+          <th><h2>Mains</h2></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+
+      {% for item in form %}
+        {{ item.id }}
+        {% if item.instance.category.category == "Mains" %}
+          <tbody>
+            <td><a href="{% url 'recipe_view' item.instance.title %}">{{ item.instance.title }}</a></td>
+            <td>{{ item.instance.dish_profit }}</td>
+            <td>{{ item.instance.price }}</td>
+            <td>{{ item.instance.available }}</td>
+            <td>{{ item.display }}</td>
+          </tbody>
+        {% endif %}
+      {% endfor %}
+
+      <thead class="heading">
+        <tr>
+          <th><h2>Desserts</h2></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+
+      {% for item in form %}
+        {{ item.id }}
+        {% if item.instance.category.category == "Desserts" %}
+          <tbody>
+            <td><a href="{% url 'recipe_view' item.instance.title %}">{{ item.instance.title }}</a></td>
+            <td>{{ item.instance.dish_profit }}</td>
+            <td>{{ item.instance.price }}</td>
+            <td>{{ item.instance.available }}</td>
+            <td>{{ item.display }}</td>
+          </tbody>
+        {% endif %}
+      {% endfor %}
+
+    </table>
+  </form>
+{% endblock %}

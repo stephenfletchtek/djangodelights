@@ -2,10 +2,19 @@
 {% load static %}
 {% block title %}Django Delights{% endblock %}
 {% block content %}
+
+  <h1>{{ menu_item.title }} Recipe</h1>
+
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    <ul>
+      <li class="breadcrumb"><a href="{% url 'menu' %}">Menu</a></li>
+      <li class="breadcrumb"><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a>
+    </ul>
+  </nav>
+
 <div>
-  <h2>Recipe for {{ menu_item.title }}</h2>
-  <table>
-    <thead>
+  <table class="menu-table">
+    <thead class="heading">
       <tr>
         <th>Ingredient</th>
         <th>Quantity</th>

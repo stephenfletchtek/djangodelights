@@ -1,23 +1,24 @@
-{% extends 'base.html' %} {% load static %} {% block title %}Django Delights{% endblock %} {% block content %}
-<div class="home">
-  <div>
-    <h2>Menu</h2>
-    <table class="line-table">
-      <thead>
-        <tr>
-          <th>Dish</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-          {% for item in menu %}
-          <tr>
-            <td>{{ item.title }}</td>
-            <td>£{{ item.price }}</td>
-          </tr>
-          {% endfor %}
-      </tbody>
-    </table>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+
+{% block content %}
+  <div class="container home">
+    <div class="plate-posn">
+      <h1 class="plate">Django Delights</h1>
+    </div>
+    {% if user.username %}
+      <h2 class="greet">Welcome {{ user.username }}</h2>
+    {% endif %}
+    <div class="button-posn">
+      {% if user.is_staff %}
+        <button class="button"><a href="{% url 'menu' %}"><h2 class="button-text">Menu management</h2></a></button>
+        <button class="button"><a href="{% url 'purchases' %}"><h2 class="button-text">Stock management</h2></a></button>
+        <button class="button"><h2 class="button-text">Sales and profit</h2></button>
+      {% else %}
+        <button class="button"><a href="{% url 'menu' %}"><h2 class="button-text">Menu</h2></a></button>
+        <button class="button"><a href="{% url 'purchases' %}"><h2 class="button-text">Orders</h2></a></button>
+      {% endif %}
+    </div>
   </div>
-</div>
 {% endblock %}

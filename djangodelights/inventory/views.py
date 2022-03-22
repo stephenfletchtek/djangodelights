@@ -8,9 +8,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, View
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+# from django.views.generic.edit import FormMixin
 
 from .forms import MenuAddForm, MenuEditNameForm, MenuEditPriceForm
+from .forms import MenuSelectForm, DisplayFormset
 from .forms import IngredientAddForm, IngredientEditForm, IngredientStockForm
 from .forms import PurchaseAddForm, PurchaseEditForm
 from .forms import RecipeAddForm, RecipeEditForm
@@ -67,7 +69,7 @@ class DeleteIngredientView(LoginRequiredMixin, DeleteView):
   success_url = '/ingredients'
 
 
-class InvetoryView(LoginRequiredMixin, ListView):
+class InventoryView(LoginRequiredMixin, ListView):
     model = Ingredient
     template_name = 'inventory/inventory.html'
 
@@ -77,14 +79,25 @@ class InvetoryView(LoginRequiredMixin, ListView):
 
 
 class MenuView(LoginRequiredMixin, ListView):
-  model = MenuItem
-  template_name = 'inventory/menu.html'
+    model = MenuItem
+    template_name = 'inventory/menu.html'
+    form_class = MenuSelectForm
 
 
 class CreateMenuView(LoginRequiredMixin, CreateView):
   model = MenuItem
   template_name = 'inventory/add_menu.html'
-  form_class = MenuAddForm
+
+
+class UpdateMenuDisplayView(LoginRequiredMixin, FormView):
+    model = MenuItem
+    template_name = 'inventory/update_menu_display.html'
+    form_class = DisplayFormset
+    success_url = '/menu'
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(self.success_url)
 
 
 class UpdateMenuNameView(LoginRequiredMixin, UpdateView):
@@ -119,7 +132,7 @@ class CreatePurchaseView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         menu_item = form.instance.menu_item
         delta = -form.instance.quantity
-        success = menu_item.adjust_stock(menu_item, delta)
+        success = menu_item.adjust_stock(delta)
         return super().form_valid(form)
 
 
@@ -133,7 +146,7 @@ class UpdatePurchaseView(LoginRequiredMixin, UpdateView):
         order = self.get_object()
         menu_item = order.menu_item
         delta = order.quantity - form.instance.quantity
-        menu_item.adjust_stock(menu_item, delta)
+        menu_item.adjust_stock(delta)
         return super().form_valid(form)
 
 
@@ -148,7 +161,7 @@ class DeletePurchaseView(LoginRequiredMixin, DeleteView):
         menu_item = order.menu_item
         delta = order.quantity
         if self.restock:
-            menu_item.adjust_stock(menu_item, delta)
+            menu_item.adjust_stock(delta)
         return super().delete(*args, **kwargs)
 
     # grab restock checkbox from form
@@ -158,6 +171,21 @@ class DeletePurchaseView(LoginRequiredMixin, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
+class Details(LoginRequiredMixin, ListView):
+    model = Recipe
+    template_name = "inventory/details.html"
+
+    def get_queryset(self):
+        title = self.kwargs['menu_item']
+        return Recipe.objects.filter(menu_item__title=title)
+
+    def get_context_data(self, **kwargs):
+        title = self.kwargs['menu_item']
+        context = super().get_context_data(**kwargs)
+        context['menu_item'] = get_object_or_404(MenuItem, title=title)
+        return context
+
+
 class RecipeView(LoginRequiredMixin, ListView):
     model = Recipe
     template_name = 'inventory/recipe.html'
@@ -165,7 +193,7 @@ class RecipeView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         title = self.kwargs['menu_item']
         self.menu_item = get_object_or_404(MenuItem, title=title)
-        return Recipe.objects.filter(menu_item__title=self.menu_item.title)
+        return Recipe.objects.filter(menu_item__title=title)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -230,7 +258,7 @@ class ReportView(LoginRequiredMixin, ListView):
             revenue = purchases.aggregate(total=total)['total']
             # costs
             orders = [
-                item.quantity * item.menu_item.dish_cost(item.menu_item)
+                item.quantity * item.menu_item.dish_cost()
                 for item in purchases
             ]
             self.orders_cost = sum(orders)

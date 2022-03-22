@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+{% block content %}
+
+  <h1>{{ menu_item.title }}</h1>
+
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    <ul>
+      <li class="breadcrumb"><a href="{% url 'menu' %}">Menu</a></li>
+      <li class="edit"><a href="{% url 'recipe_view' menu_item.title %}">Edit</a></li>
+    </ul>
+  </nav>
+
+  <section>
+    <h2 class="detail">Ingredients</h2>
+    <article>
+      {% for item in object_list %}
+        {{ item.ingredient.name }}
+        {% if not forloop.last %},{% endif %}
+      {% endfor %}
+    </article>
+    <h2 class="detail">Description</h2>
+    <article>
+      {{ menu_item.description }}
+    </article>
+  </section>
+
+{% endblock %}

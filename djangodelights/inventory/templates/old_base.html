@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="https://www.codecademy.com/favicon.ico"
+    />
+    <link rel="stylesheet" type="text/css" href="{% static 'inventory/style.css' %}" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{% block title %}Django Delights{% endblock %}</title>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header>
+      {% if user.username %}
+        <a class="logout-button" href="{% url 'logout' %}">Log Out</a>
+      {% else %}
+        {% if 'login' in request.path %}
+          <a class="logout-button" href="{% url 'signup' %}">Sign Up</a>
+        {% endif %}
+      {% endif %}
+      <div class="header-first-row">
+        <img
+          src="{% static 'inventory/plate.jpeg' %}"
+          alt="Django Delights Logo"
+          width="80px"
+        />
+        <h1 class="title">Django Delights</h1>
+      </div>
+      {% if user.username %}
+        <h4 class="header-greet">Welcome {{ user.username }}!</h4>
+        <nav class="navbar">
+            <a href="{% url 'home' %}" {% if request.path == '/' %} class="current-page" {% endif %}>Home</a>
+            <a href="{% url 'purchases' %}" {% if 'purchases' in request.path %} class="current-page" {% endif %}>Purchases</a>
+            <a href="{% url 'inventory' %}" {% if 'inventory' in request.path %} class="current-page" {% endif %}>Inventory</a>
+            <a href="{% url 'report' %}" {% if 'report' in request.path %} class="current-page" {% endif %}>Reports</a>
+            <a href="{% url 'menu' %}" {% if 'menu' in request.path %} class="current-page" {% endif %}>Menu</a>
+            <a href="{% url 'ingredients' %}" {% if 'ingredients' in request.path %} class="current=page" {% endif %}>Ingredients</a>
+        </nav>
+      {% endif %}
+    </header>
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>
