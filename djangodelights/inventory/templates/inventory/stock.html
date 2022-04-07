@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+
+{% block content %}
+  <h1>Stock Management</h1>
+  <ul>
+    <li><a href="{% url 'current_stock' %}">Current Stock</a></li>
+    <li><a href="{% url 'stocked_recipes' %}">Stocked Recipes</a></li>
+    <li><a href="{% url 'shopping_list' %}">Shopping List</a></li>
+    <li><a href="{% url 'ingredients' %}">Ingredients List</a></li>
+    <li><a href="{% url 'orphans' %}">Orphan ingredients</a></li>
+  </ul>
+
+{% endblock %}

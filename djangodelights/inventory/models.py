@@ -30,8 +30,32 @@ class Ingredient(models.Model):
     threshold = models.IntegerField(blank=True, null=True)
     re_order = models.IntegerField(blank=True, null=True)
 
+    # Returns reorder quantity if kanban is true and stock is below threshold
+    def buy(self):
+        if self.kanban and self.quantity < self.threshold:
+            return self.re_order
+        else:
+            return 0
+
+    # return 'True' if it's not in a recipe
+    def no_recipe(self):
+        recipes = self.recipe_set.all()
+        if len(recipes) == 0:
+            return True
+        else:
+            return False
+
+    # returns True if ingredient appears in only one recipe
+    # and stock_item for that recipe is False
+    def non_stock(self):
+        recipes = self.recipe_set.all()
+        if len(recipes) == 1 and recipes[0].menu_item.stock_item == False:
+            return True
+        else:
+            return False
+
     def get_absolute_url(self):
-        return '/ingredients'
+        return reverse('ingredients')
 
     def __str__(self):
         return f'{self.name}, {self.unit}'
@@ -41,7 +65,6 @@ class MenuItem(models.Model):
     class Meta:
         ordering = ['title']
 
-
     title = models.CharField(unique=True, max_length=200)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -49,6 +72,8 @@ class MenuItem(models.Model):
     display = models.BooleanField(default=True)
     # rich description of the dish
     description = models.TextField(blank=True, null=True)
+    # whether the dish is stocked or not
+    stock_item = models.BooleanField(default=True)
 
     # Takes a menu_item object
     # Returns how many of the dish can be made from stock
@@ -93,6 +118,24 @@ class MenuItem(models.Model):
             profit = 0
         return profit
 
+    # overrides kanban boolean in Ingredient model
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # if dish is stocked then set each ingredient kanban to 'True'
+        if self.stock_item == True:
+            for obj in self.recipe_set.all():
+                obj.ingredient.kanban = True
+                obj.ingredient.save()
+        else:
+            for obj in self.recipe_set.all():
+                # ingredient is unique in this recipe only
+                # set ingredient kanban to 'False' for unique items
+                if len(Recipe.objects.filter(ingredient=obj.ingredient)) == 1:
+                    obj.ingredient.kanban = False
+                    obj.ingredient.save()
+        return self
+
     def get_absolute_url(self):
         return '/menu'
 
@@ -113,7 +156,7 @@ class Recipe(models.Model):
 
     def get_absolute_url(self):
         # this gets the currently selected menu item
-        return reverse('recipe_view', args=[str(self.menu_item.title)])
+        return reverse('menu_item_edit', args=[str(self.menu_item.title)])
 
     def __str__(self):
         return f'{self.ingredient.name} from {self.menu_item.title}'

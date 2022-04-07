@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+
+{% block content %}
+  <h1>Inactive ingredients</h1>
+  <table>
+    <thead>
+      <tr>
+        <th><h2>In recipes not stocked</h2></th>
+        <th>Stock</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in object_list %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.unit }}</td>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th><h2>Not in a recipe</h2></th>
+        <th>Stock</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in no_recipe %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.unit }}</td>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}

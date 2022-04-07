@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+
+{% block content %}
+  <h1>Sales & Profit</h1>
+  <ul>
+    <li><a href="{% url 'report' %}">Sales & Profit</a></li>
+    <li><a href="{% url 'best_sellers' %}">Best Sellers</a></li>
+  </ul>
+
+{% endblock %}

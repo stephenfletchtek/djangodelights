@@ -8,10 +8,10 @@
   <nav aria-label="Breadcrumb" class="breadcrumb">
     <ul>
       <li class="breadcrumb"><a href="{% url 'menu' %}">Menu</a></li>
-      <li class="edit"><a href="{% url 'recipe_view' menu_item.title %}">Edit</a></li>
+      <li class="edit"><a href="{% url 'menu_item_edit' menu_item.title %}">Edit</a></li>
     </ul>
   </nav>
-
+  <a class="delete-button" href="{% url 'delete_menu' menu_item.title %}">❌</a>
   <section>
     <h2 class="detail">Ingredients</h2>
     <article>

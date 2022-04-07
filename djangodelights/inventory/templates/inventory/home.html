@@ -13,8 +13,8 @@
     <div class="button-posn">
       {% if user.is_staff %}
         <button class="button"><a href="{% url 'menu' %}"><h2 class="button-text">Menu management</h2></a></button>
-        <button class="button"><a href="{% url 'purchases' %}"><h2 class="button-text">Stock management</h2></a></button>
-        <button class="button"><h2 class="button-text">Sales and profit</h2></button>
+        <button class="button"><a href="{% url 'stock' %}"><h2 class="button-text">Stock management</h2></a></button>
+        <button class="button"><a href="{% url 'sales_profit' %}"><h2 class="button-text">Sales and profit</h2></a></button>
       {% else %}
         <button class="button"><a href="{% url 'menu' %}"><h2 class="button-text">Menu</h2></a></button>
         <button class="button"><a href="{% url 'purchases' %}"><h2 class="button-text">Orders</h2></a></button>

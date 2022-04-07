@@ -17,16 +17,14 @@
       {% for item in object_list %}
           <tr>
             <td>
-              <a href="{% url 'update_ingredients' item.id %}">{{ item.name }}<a>
+              <a href="{% url 'update_ingredients' item.name %}">{{ item.name }}<a>
             </td>
-            <td>
-              <a href="{% url 'update_stock' item.id %}">{{ item.quantity }}</a>
-            </td>
+            <td><a>{{ item.quantity }}</a></td>
             <td>
               {{ item.unit}}
             </td>
             <td>
-              <a class="delete-button" href="{% url 'delete_ingredients' item.id %}">❌</a>
+              <a class="delete-button" href="{% url 'delete_ingredients' item.name %}">❌</a>
             </td>
           </tr>
       {% endfor %}

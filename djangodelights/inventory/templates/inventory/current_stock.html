@@ -2,8 +2,8 @@
 {% load static %}
 {% block title %}Django Delights{% endblock %}
 {% block content %}
-<div>
   <h2>Ingredients in Stock</h2>
+  <a href="{% url 'update_stock' %}">Edit</a>
   <table>
     <thead>
       <tr>
@@ -15,21 +15,11 @@
     <tbody>
       {% for item in object_list %}
           <tr>
-            <td>
-              {{ item.name }}
-            </td>
-            <td>
-              {{ item.quantity }}
-            </td>
-            <td>
-              {{ item.unit}}
-            </td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit}}</td>
           </tr>
       {% endfor %}
     </tbody>
   </table>
-  {% comment %}
-  <a class="add-button" href="{% url 'create_ingredients' %}">Restock</a>
-  {% endcomment%}
-</div>
 {% endblock %}
