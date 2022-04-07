@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+
+{% block content %}
+  <h1>Shopping list</h1>
+  <a href="{% url 'update_menu_display' %}">All recipes</a>
+  <table>
+    <thead>
+      <tr>
+        <th>Ingredient</th>
+        <th>Stock</th>
+        <th>To buy</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in object_list %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.re_order }}</td>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

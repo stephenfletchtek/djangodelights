@@ -1,7 +1,7 @@
 from django import forms, template
 
 from django.core.exceptions import ValidationError
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory, BaseModelFormSet
 
 from .models import Ingredient, MenuItem, Recipe, Purchase
 
@@ -16,13 +16,9 @@ class IngredientAddForm(forms.ModelForm):
 class IngredientEditForm(forms.ModelForm):
     class Meta:
         model = Ingredient
-        exclude = ['quantity']
-
-
-class IngredientStockForm(forms.ModelForm):
-    class Meta:
-        model = Ingredient
-        fields = ['quantity']
+        fields = [
+            'name', 'unit', 'unit_price', 'kanban', 'threshold', 're_order'
+        ]
 
 
 class MenuSelectForm(forms.ModelForm):
@@ -36,14 +32,31 @@ class MenuSelectForm(forms.ModelForm):
     #     self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
 
 
-DisplayFormset = modelformset_factory(MenuItem, fields=('display',), extra=0)
+DisplayFormset = modelformset_factory(MenuItem, fields=('stock_item','display',), extra=0)
+
+
+# only display 'in stock' ingredients in formset
+class BaseStockFormSet(BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.queryset = Ingredient.objects.filter(quantity__gt=0)
+
+
+UpdateStockFormset = modelformset_factory(Ingredient, fields=('quantity',), formset=BaseStockFormSet, extra=0)
 
 
 # used to add menu item
 class MenuAddForm(forms.ModelForm):
     class Meta:
         model = MenuItem
-        fields = ["title", "price"]
+        fields = '__all__'
+
+
+# used to update description
+class MenuEditDescription(forms.ModelForm):
+    class Meta:
+        model = MenuItem
+        fields = ["description"]
 
 
 # used to uodate menu name

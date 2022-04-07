@@ -10,6 +10,7 @@
       <input class="addbutton" type="submit" value="Update" />
     </div>
 
+    <a class="add-button" href="{% url 'create_menu' %}">➕</a>
     {{ form.management_form }}
     <table class="menu-table">
       <thead class="heading">
@@ -18,6 +19,7 @@
           <th>Profit</th>
           <th>Price</th>
           <th>Stock</th>
+          <th>Stocked</th>
           <th>Display</th>
         </tr>
       </thead>
@@ -26,10 +28,11 @@
         {{ item.id }}
         {% if item.instance.category.category == "Starters" %}
           <tbody>
-            <td><a href="{% url 'recipe_view' item.instance.title %}">{{ item.instance.title }}</a></td>
+            <td><a href="{% url 'details' item.instance.title %}">{{ item.instance.title }}</a></td>
             <td>{{ item.instance.dish_profit }}</td>
-            <td>{{ item.instance.price }}</td>
+            <td><a href="{% url 'update_menu_price' item.instance.title %}">{{ item.instance.price }}</a></td>
             <td>{{ item.instance.available }}</td>
+            <td>{{ item.stock_item }}</td>
             <td>{{ item.display }}</td>
           </tbody>
         {% endif %}
@@ -42,6 +45,7 @@
           <th></th>
           <th></th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
 
@@ -49,10 +53,11 @@
         {{ item.id }}
         {% if item.instance.category.category == "Mains" %}
           <tbody>
-            <td><a href="{% url 'recipe_view' item.instance.title %}">{{ item.instance.title }}</a></td>
+            <td><a href="{% url 'details' item.instance.title %}">{{ item.instance.title }}</a></td>
             <td>{{ item.instance.dish_profit }}</td>
-            <td>{{ item.instance.price }}</td>
+            <td><a href="{% url 'update_menu_price' item.instance.title %}">{{ item.instance.price }}</a></td>
             <td>{{ item.instance.available }}</td>
+            <td>{{ item.stock_item }}</td>
             <td>{{ item.display }}</td>
           </tbody>
         {% endif %}
@@ -65,6 +70,7 @@
           <th></th>
           <th></th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
 
@@ -72,10 +78,11 @@
         {{ item.id }}
         {% if item.instance.category.category == "Desserts" %}
           <tbody>
-            <td><a href="{% url 'recipe_view' item.instance.title %}">{{ item.instance.title }}</a></td>
+            <td><a href="{% url 'details' item.instance.title %}">{{ item.instance.title }}</a></td>
             <td>{{ item.instance.dish_profit }}</td>
-            <td>{{ item.instance.price }}</td>
+            <td><a href="{% url 'update_menu_price' item.instance.title %}">{{ item.instance.price }}</a></td>
             <td>{{ item.instance.available }}</td>
+            <td>{{ item.stock_item }}</td>
             <td>{{ item.display }}</td>
           </tbody>
         {% endif %}

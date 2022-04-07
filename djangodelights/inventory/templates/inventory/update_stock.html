@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <h1>Recipes</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="add">
+      <p>Edit stock</p>
+      <input class="addbutton" type="submit" value="Update" />
+    </div>
+
+    <a href="{% url 'ingredients' %}">Edit Ingredients</a>
+    {{ form.management_form }}
+    <table class="menu-table">
+      <thead class="heading">
+        <tr>
+          <th>Ingredient</th>
+          <th>Quantity</th>
+          <th>Unit of measure</th>
+        </tr>
+      </thead>
+
+      {% for item in form %}
+        {{ item.id }}
+        <tbody>
+          <td>{{ item.instance.name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{item.instance.unit }}</td>
+        </tbody>
+      {% endfor %}
+    </table>
+  </form>
+{% endblock %}

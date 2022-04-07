@@ -6,16 +6,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 # from django.views.generic.edit import FormMixin
 
 from .forms import MenuAddForm, MenuEditNameForm, MenuEditPriceForm
-from .forms import MenuSelectForm, DisplayFormset
-from .forms import IngredientAddForm, IngredientEditForm, IngredientStockForm
+from .forms import MenuEditDescription, MenuSelectForm
+from .forms import IngredientAddForm, IngredientEditForm
 from .forms import PurchaseAddForm, PurchaseEditForm
 from .forms import RecipeAddForm, RecipeEditForm
+from .forms import DisplayFormset, UpdateStockFormset
 from .models import MenuItem, Ingredient, Recipe, Purchase
 
 
@@ -52,30 +53,27 @@ class CreateIngredientView(LoginRequiredMixin, CreateView):
 
 
 class UpdateIngredientView(LoginRequiredMixin, UpdateView):
-  model = Ingredient
-  template_name = 'inventory/update_ingredient.html'
-  form_class = IngredientEditForm
-
-
-class IngredientStockView(LoginRequiredMixin, UpdateView):
     model = Ingredient
-    template_name = 'inventory/update_ingredient_stock.html'
-    form_class = IngredientStockForm
+    template_name = 'inventory/update_ingredient.html'
+    form_class = IngredientEditForm
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        name = self.kwargs['name']
+        ingredient = get_object_or_404(Ingredient, name=name)
+        return ingredient
 
 
 class DeleteIngredientView(LoginRequiredMixin, DeleteView):
   model = Ingredient
   template_name = 'inventory/delete_ingredient.html'
-  success_url = '/ingredients'
+  success_url = '/stock/ingredients/'
 
-
-class InventoryView(LoginRequiredMixin, ListView):
-    model = Ingredient
-    template_name = 'inventory/inventory.html'
-
-    # ingredients in stock
-    def get_queryset(self):
-        return Ingredient.objects.filter(quantity__gt=0)
+  # overriding get_object() means no need to slug_the_url_conf
+  def get_object(self, queryset=None):
+      name = self.kwargs['name']
+      ingredient = get_object_or_404(Ingredient, name=name)
+      return ingredient
 
 
 class MenuView(LoginRequiredMixin, ListView):
@@ -85,8 +83,10 @@ class MenuView(LoginRequiredMixin, ListView):
 
 
 class CreateMenuView(LoginRequiredMixin, CreateView):
-  model = MenuItem
-  template_name = 'inventory/add_menu.html'
+    model = MenuItem
+    template_name = 'inventory/add_menu.html'
+    form_class = MenuAddForm
+    success_url = '/menu/displayupdate/'
 
 
 class UpdateMenuDisplayView(LoginRequiredMixin, FormView):
@@ -100,22 +100,66 @@ class UpdateMenuDisplayView(LoginRequiredMixin, FormView):
         return HttpResponseRedirect(self.success_url)
 
 
+# tacks on menu description edit to recipe view (admin use)
+class UpdateMenuDescriptionView(LoginRequiredMixin, UpdateView):
+    model = MenuItem
+    template_name = 'inventory/update_menu_description.html'
+    form_class = MenuEditDescription
+    success_url = '/menu/'
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        title = self.kwargs['menu_item']
+        menu_item = get_object_or_404(MenuItem, title=title)
+        return menu_item
+
+    def form_valid(self, form):
+        try:
+            result = self.success_url + self.kwargs['menu_item']
+        except:
+            result = self.success_url
+
+        self.object = form.save()
+        return HttpResponseRedirect(result)
+
+    def get_context_data(self, **kwargs):
+        title = self.kwargs['menu_item']
+        menu_item = get_object_or_404(MenuItem, title=title)
+        recipes = Recipe.objects.filter(menu_item__title=title)
+        context = super().get_context_data(**kwargs)
+        context['menu_item'] = menu_item
+        context['recipes'] = recipes
+        return context
+
+
 class UpdateMenuNameView(LoginRequiredMixin, UpdateView):
-  model = MenuItem
-  template_name = 'inventory/update_menu_name.html'
-  form_class = MenuEditNameForm
+    model = MenuItem
+    template_name = 'inventory/update_menu_name.html'
+    form_class = MenuEditNameForm
 
 
 class UpdateMenuPriceView(LoginRequiredMixin, UpdateView):
-  model = MenuItem
-  template_name = 'inventory/update_menu_price.html'
-  form_class = MenuEditPriceForm
+    model = MenuItem
+    template_name = 'inventory/update_menu_price.html'
+    form_class = MenuEditPriceForm
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        title = self.kwargs['menu_item']
+        menu_item = get_object_or_404(MenuItem, title=title)
+        return menu_item
 
 
 class DeleteMenuView(LoginRequiredMixin, DeleteView):
-  model = MenuItem
-  template_name = 'inventory/delete_menu.html'
-  success_url = '/menu'
+    model = MenuItem
+    template_name = 'inventory/delete_menu.html'
+    success_url = '/menu'
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        title = self.kwargs['menu_item']
+        menu_item = get_object_or_404(MenuItem, title=title)
+        return menu_item
 
 
 class PurchaseView(LoginRequiredMixin, ListView):
@@ -186,21 +230,6 @@ class Details(LoginRequiredMixin, ListView):
         return context
 
 
-class RecipeView(LoginRequiredMixin, ListView):
-    model = Recipe
-    template_name = 'inventory/recipe.html'
-
-    def get_queryset(self):
-        title = self.kwargs['menu_item']
-        self.menu_item = get_object_or_404(MenuItem, title=title)
-        return Recipe.objects.filter(menu_item__title=title)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['menu_item'] = self.menu_item
-        return context
-
-
 class CreateRecipeView(LoginRequiredMixin, CreateView):
     model = Recipe
     template_name = 'inventory/add_recipe.html'
@@ -226,14 +255,22 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
         context['menu_item'] = self.kwargs['menu_item']
         return context
 
-    def get_success_url(self, **kwargs):
-        return self.object.get_absolute_url()
-
 
 class UpdateRecipeView(LoginRequiredMixin, UpdateView):
     model = Recipe
     template_name = 'inventory/update_recipe.html'
     form_class = RecipeEditForm
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        name = self.kwargs['ingredient']
+        ingredient = get_object_or_404(Ingredient, name=name)
+        title = self.kwargs['menu_item']
+        menu_item = get_object_or_404(MenuItem, title=title)
+        recipe = get_object_or_404(
+            Recipe, menu_item=menu_item, ingredient=ingredient
+            )
+        return recipe
 
 
 # Delete recipe will cause associated orders to delete
@@ -242,8 +279,23 @@ class DeleteRecipeView(LoginRequiredMixin, DeleteView):
     model = Recipe
     template_name = 'inventory/delete_recipe.html'
 
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        name = self.kwargs['ingredient']
+        ingredient = get_object_or_404(Ingredient, name=name)
+        title = self.kwargs['menu_item']
+        menu_item = get_object_or_404(MenuItem, title=title)
+        recipe = get_object_or_404(
+            Recipe, menu_item=menu_item, ingredient=ingredient
+            )
+        return recipe
+
     def get_success_url(self, **kwargs):
         return self.object.get_absolute_url()
+
+
+class SalesProfitView(LoginRequiredMixin, TemplateView):
+    template_name = "inventory/sales_profit.html"
 
 
 class ReportView(LoginRequiredMixin, ListView):
@@ -258,8 +310,7 @@ class ReportView(LoginRequiredMixin, ListView):
             revenue = purchases.aggregate(total=total)['total']
             # costs
             orders = [
-                item.quantity * item.menu_item.dish_cost()
-                for item in purchases
+                obj.quantity * obj.menu_item.dish_cost() for obj in purchases
             ]
             self.orders_cost = sum(orders)
             # profit
@@ -279,4 +330,83 @@ class ReportView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['orders'] = self.orders_cost
         context['profit'] = self.profit
+        return context
+
+
+class BestSellerView(LoginRequiredMixin, ListView):
+    model = Purchase
+    template_name = 'inventory/best_sellers.html'
+
+    def get_queryset(self):
+        # dict comprehension of menu_item__title and aggregated quantity
+        field = 'menu_item__title'
+        titles = Purchase.objects.order_by().values(field).distinct()
+        total = Sum(F('quantity'))
+        result = {
+            key[field]: Purchase.objects.filter(menu_item__title=key[field])
+            .aggregate(total=total)['total'] for key in titles
+        }
+
+        # find menu_item with highest quantity and return it
+        best_seller = max(result, key=lambda key:result[key])
+        return {best_seller: result[best_seller]}
+
+
+class StockView(LoginRequiredMixin, TemplateView):
+    template_name = "inventory/stock.html"
+
+
+class CurrentStockView(LoginRequiredMixin, ListView):
+    model = Ingredient
+    template_name = 'inventory/current_stock.html'
+
+    # ingredients in stock
+    def get_queryset(self):
+        return Ingredient.objects.filter(quantity__gt=0)
+
+
+class UpdateStockView(LoginRequiredMixin, FormView):
+    model = Ingredient
+    template_name = 'inventory/update_stock.html'
+    form_class = UpdateStockFormset
+    success_url = '/stock/currentstock/'
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(self.success_url)
+
+
+class StockedRecipes(LoginRequiredMixin, ListView):
+    model = MenuItem
+    template_name = "inventory/stocked_recipes.html"
+
+    def get_queryset(self):
+        menu = MenuItem.objects.all()
+        stocked = [obj for obj in menu if obj.stock_item]
+        return stocked
+
+
+class ShoppingList(LoginRequiredMixin, ListView):
+    model = Ingredient
+    template_name = "inventory/shopping_list.html"
+
+    def get_queryset(self):
+        ingredients = Ingredient.objects.all()
+        shopping_list = [obj for obj in ingredients if obj.buy()]
+        return shopping_list
+
+
+class OrphanIngredientView(LoginRequiredMixin, ListView):
+    model = Ingredient
+    template_name = "inventory/orphans.html"
+
+    def get_queryset(self):
+        ingredients = Ingredient.objects.all()
+        self.no_recipe = [obj for obj in ingredients if obj.no_recipe()]
+        non_stock = [obj for obj in ingredients if obj.non_stock()]
+        return non_stock
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['no_recipe'] = self.no_recipe
         return context
