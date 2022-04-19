@@ -36,6 +36,7 @@ class Ingredient(models.Model):
             return self.re_order
         else:
             return 0
+        
 
     # return 'True' if it's not in a recipe
     def no_recipe(self):
@@ -162,6 +163,7 @@ class Recipe(models.Model):
         return f'{self.ingredient.name} from {self.menu_item.title}'
 
 
+# use this model to store restaurant 'purchases'
 class Purchase(models.Model):
     class Meta:
         ordering = ['timestamp']
@@ -178,3 +180,22 @@ class Purchase(models.Model):
 
     def __str__(self):
         return f'{self.menu_item}'
+
+
+# use ths model to store shopping lists after 'purchase'
+class Shop(models.Model):
+    class Meta:
+        ordering = ['timestamp']
+
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(default=timezone.now)
+    quantity = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)]
+    )
+
+    def get_absolute_url(self):
+        return '/stock/shoppinglist/'
+
+    def __str__(self):
+        return f'{self.ingredient}'
