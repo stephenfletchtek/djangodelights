@@ -1,0 +1,24 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+  <h2>Edit Basket</h2>
+  <form method="post">
+    {% csrf_token %}
+    <input type="submit" value="Confirm" />
+    {{ form.management_form }}
+    <table class="menu-table">
+      <thead class="heading">
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      {% for item in form %}
+        {{ item.id }}
+        <tbody>
+          <td>{{ item.instance.ingredient }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.DELETE }}</td>
+        </tbody>
+      {% endfor %}
+  </form>
+{% endblock %}

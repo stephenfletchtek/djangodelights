@@ -3,7 +3,49 @@ from django import forms, template
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory, BaseModelFormSet
 
-from .models import Ingredient, MenuItem, Recipe, Purchase
+from .models import Basket, Ingredient, MenuItem, Recipe, Purchase, OrderNumber, Order
+
+
+# Add any item to basket
+class AddForm(forms.ModelForm):
+    class Meta:
+        model = Basket
+        fields = '__all__'
+
+
+# Add item from restock list to basket
+class BasketAddForm(forms.ModelForm):
+    class Meta:
+        model = Basket
+        fields = ['quantity']
+
+    def __init__(self, ingredient_obj=None, **kwargs):
+        super().__init__(**kwargs)
+        self.initial['quantity'] = ingredient_obj.re_order
+
+
+# Add in item from restock list to basket as an update
+class BasketUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Basket
+        fields = ['quantity']
+
+    def __init__(self, basket_obj=None, **kwargs):
+        super().__init__(**kwargs)
+        self.initial['quantity'] = basket_obj.ingredient.re_order
+
+
+# Edit basket
+EditBasketFormset = modelformset_factory(
+    Basket, fields=('quantity',), can_delete=True, extra=0
+)
+
+
+# create order
+class CreateOrderForm(forms.ModelForm):
+    class Meta:
+        model = OrderNumber
+        fields = "__all__"
 
 
 # used to add

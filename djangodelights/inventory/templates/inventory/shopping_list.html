@@ -3,14 +3,19 @@
 {% block title %}Django Delights{% endblock %}
 
 {% block content %}
-  <h1>Items that need restocking</h1>
   <a href="{% url 'update_menu_display' %}">All recipes</a>
+  <h1>Items that need restocking</h1>
+  <ul>
+    <li><a href="{% url 'basket_view' %}">View Basket</a></li>
+    <li><a href="{% url 'orders' %}">Shopping Orders</a></li>
+  </ul>
   <table>
     <thead>
       <tr>
-        <th>Ingredient</th>
+        <th>Item</th>
         <th>Stock</th>
         <th>To buy</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -19,6 +24,15 @@
           <td>{{ item.name }}</td>
           <td>{{ item.quantity }}</td>
           <td>{{ item.re_order }}</td>
+          {% comment %} Use 'add' if item is not in basket or 'update' if it is {% endcomment %}
+          <td><a
+            {% if item.in_basket %}
+              href="{% url 'update_basket' item.name %}"
+            {% else %}
+              href="{% url 'add_to_basket' item.name %}"
+            {% endif %}>Add to basket</a>
+          </td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+
+{% block content %}
+  <h1>Basket</h1>
+  <ul>
+    <li><a href="{% url 'shopping_list' %}">Shopping List</a></li>
+    <li><a href="{% url 'add_any' %}">Add item</a></li>
+  </ul>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in object_list %}
+        <tr>
+          <td>{{ item.ingredient.name }}</td>
+          <td>{{ item.quantity }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <ul>
+    <li><a href="{% url 'edit_basket' %}">Edit Basket</a></li>
+    <li><a href="{% url 'create_order' %}">Create Order</a></li>
+  </ul>
+{% endblock %}

@@ -13,7 +13,7 @@ class Category(models.Model):
     category = models.CharField(unique=True, max_length=200)
 
     def __str__(self):
-        return self.category
+        return f'{self.id} -- {self.category}'
 
 
 class Ingredient(models.Model):
@@ -36,7 +36,14 @@ class Ingredient(models.Model):
             return self.re_order
         else:
             return 0
-        
+
+    # return 'True' if item is in the basket
+    def in_basket(self):
+        ingredients = [obj.ingredient for obj in Basket.objects.all()]
+        if self in ingredients:
+            return True
+        else:
+            return False
 
     # return 'True' if it's not in a recipe
     def no_recipe(self):
@@ -46,7 +53,7 @@ class Ingredient(models.Model):
         else:
             return False
 
-    # returns True if ingredient appears in only one recipe
+    # return 'True' if ingredient appears in only one recipe
     # and stock_item for that recipe is False
     def non_stock(self):
         recipes = self.recipe_set.all()
@@ -76,8 +83,7 @@ class MenuItem(models.Model):
     # whether the dish is stocked or not
     stock_item = models.BooleanField(default=True)
 
-    # Takes a menu_item object
-    # Returns how many of the dish can be made from stock
+    # Returns how many of the menu_item can be made from stock
     def available(self):
         try:
             recipe = self.recipe_set.all()
@@ -119,7 +125,7 @@ class MenuItem(models.Model):
             profit = 0
         return profit
 
-    # overrides kanban boolean in Ingredient model
+    # overrides ingredient.kanban according to menu_item.stock_item status
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -130,7 +136,7 @@ class MenuItem(models.Model):
                 obj.ingredient.save()
         else:
             for obj in self.recipe_set.all():
-                # ingredient is unique in this recipe only
+                # if ingredient is unique in this recipe only
                 # set ingredient kanban to 'False' for unique items
                 if len(Recipe.objects.filter(ingredient=obj.ingredient)) == 1:
                     obj.ingredient.kanban = False
@@ -138,7 +144,7 @@ class MenuItem(models.Model):
         return self
 
     def get_absolute_url(self):
-        return '/menu'
+        return reverse('menu')
 
     def __str__(self):
         available = self.available()
@@ -156,17 +162,17 @@ class Recipe(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=3)
 
     def get_absolute_url(self):
-        # this gets the currently selected menu item
+        # currently selected menu item
         return reverse('menu_item_edit', args=[str(self.menu_item.title)])
 
     def __str__(self):
         return f'{self.ingredient.name} from {self.menu_item.title}'
 
 
-# use this model to store restaurant 'purchases'
+# used to store customer purchases from the menu
 class Purchase(models.Model):
     class Meta:
-        ordering = ['timestamp']
+        ordering = ['-timestamp']
 
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(default=timezone.now)
@@ -176,26 +182,83 @@ class Purchase(models.Model):
     )
 
     def get_absolute_url(self):
-        return '/purchases'
+        return reverse('purchases')
 
     def __str__(self):
         return f'{self.menu_item}'
 
 
-# use ths model to store shopping lists after 'purchase'
-class Shop(models.Model):
-    class Meta:
-        ordering = ['timestamp']
-
+# use this model to hold the shopping basket
+class Basket(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)]
+    )
+
+    # Adjusts quantity of basket object
+    # Delta is an integer: positive for increase
+    def change_quantity(self, delta):
+        try:
+            self.quantity += delta
+            self.save()
+            return True
+        except:
+            return False
+
+    def get_absolute_url(self):
+        return reverse('basket_view')
+
+    def __str__(self):
+        return f'{self.ingredient}'
+
+
+# create a unique order number(id) and timestamp for use with Orders
+class OrderNumber(models.Model):
+    class Meta:
+        ordering = ['-id']
+
     timestamp = models.DateTimeField(default=timezone.now)
+
+    # perform actions when model is saved (when an order is created)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # move contents of basket over into a new order
+        # and increment stock of items ordered
+        order_number = OrderNumber.objects.latest('id')
+        basket = Basket.objects.all()
+        for item in basket:
+            Order.objects.create(
+                order_number=order_number,
+                ingredient=item.ingredient,
+                quantity=item.quantity
+            )
+            item.ingredient.quantity += item.quantity
+            item.ingredient.save()
+            item.delete()
+
+    def get_absolute_url(self):
+        return reverse('shopping_list')
+
+    def __str__(self):
+        return f'{self.id} -- {self.timestamp}'
+
+
+# use ths model to store shopping lists after 'purchase'
+class Order(models.Model):
+    class Meta:
+        ordering = ['order_number']
+
+    order_number = models.ForeignKey(OrderNumber, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, blank=True, null=True, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)]
     )
 
     def get_absolute_url(self):
-        return '/stock/shoppinglist/'
+        return reverse('shopping_list')
 
     def __str__(self):
-        return f'{self.ingredient}'
+        return f'{self.order_number} -- {self.ingredient}'
