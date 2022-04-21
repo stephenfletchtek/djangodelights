@@ -14,10 +14,12 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormVi
 from .forms import MenuAddForm, MenuEditNameForm, MenuEditPriceForm
 from .forms import MenuEditDescription, MenuSelectForm
 from .forms import IngredientAddForm, IngredientEditForm
+from .forms import AddForm, BasketAddForm, BasketUpdateForm, EditBasketFormset
 from .forms import PurchaseAddForm, PurchaseEditForm
 from .forms import RecipeAddForm, RecipeEditForm
 from .forms import DisplayFormset, UpdateStockFormset
-from .models import MenuItem, Ingredient, Recipe, Purchase
+from .forms import CreateOrderForm
+from .models import Basket, MenuItem, Ingredient, Recipe, Purchase, OrderNumber, Order
 
 
 class SignUp(CreateView):
@@ -162,9 +164,129 @@ class DeleteMenuView(LoginRequiredMixin, DeleteView):
         return menu_item
 
 
+# *** BASKET STUFF ***
+# view basket
+class BasketView(LoginRequiredMixin, ListView):
+    model = Basket
+    template_name = 'inventory/basket.html'
+
+
+# add any ingredient
+class AddBasketView(LoginRequiredMixin, CreateView):
+    model = Basket
+    template_name = 'inventory/add_basket.html'
+    form_class = AddForm
+
+    # horrible hack for create_or_update
+    def form_valid(self, form):
+        ingredient = form.instance.ingredient
+        quantity = form.instance.quantity
+        if ingredient.in_basket():
+            # amend quantity
+            basket_obj = get_object_or_404(Basket, ingredient=ingredient)
+            basket_obj.change_quantity(quantity)
+            return HttpResponseRedirect(reverse('basket_view'))
+        else:
+            # add ingredient
+            return super().form_valid(form)
+
+
+# add item from restock list
+class CreateBasketView(LoginRequiredMixin, CreateView):
+    model = Basket
+    template_name = 'inventory/add_basket.html'
+    form_class = BasketAddForm
+    success_url = '/stock/shoppinglist/'
+
+    # add ingredient after valid form is posted
+    # this would overwrite form if field was exposed
+    def form_valid(self, form):
+        form.instance.ingredient = self.get_object()
+        return super().form_valid(form)
+
+    # put ingredient into context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ingredient'] = self.kwargs['ingredient']
+        return context
+
+    # put ingredient object into form kwargs
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'ingredient_obj': self.get_object()})
+        return kwargs
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        name = self.kwargs['ingredient']
+        ingredient = get_object_or_404(Ingredient, name=name)
+        return ingredient
+
+
+# add in item from restock list
+class UpdateBasketView(LoginRequiredMixin, UpdateView):
+    model = Basket
+    template_name = 'inventory/update_basket.html'
+    form_class = BasketUpdateForm
+    success_url = '/stock/shoppinglist/'
+
+    # override form to add quantity to amount already in basket
+    def form_valid(self, form):
+        in_basket = self.get_object().quantity
+        form.instance.quantity += in_basket
+        return super().form_valid(form)
+
+    # put ingredient into context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ingredient'] = self.kwargs['ingredient']
+        return context
+
+    # put basket object into form kwargs
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'basket_obj': self.get_object()})
+        return kwargs
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        name = self.kwargs['ingredient']
+        basket = get_object_or_404(Basket, ingredient__name=name)
+        return basket
+
+
+# Edit the basket
+class EditBasketView(LoginRequiredMixin, FormView):
+    model = Basket
+    template_name = 'inventory/edit_basket.html'
+    form_class = EditBasketFormset
+    success_url = '/stock/basket/'
+
+    def form_valid(self, form):
+        # cannot commit form to database if about to delete
+        form.save(commit=False)
+        for obj in form.deleted_objects:
+            obj.delete()
+        form.save()
+        return super().form_valid(form)
+
+
+# view orders
+class OrderView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'inventory/orders.html'
+
+
+# creates an order_number and then flushes basket into orders
+class CreateOrderView(LoginRequiredMixin, CreateView):
+    model = OrderNumber
+    template_name = 'inventory/add_order.html'
+    form_class = CreateOrderForm
+
+
 class PurchaseView(LoginRequiredMixin, ListView):
-  model = Purchase
-  template_name = 'inventory/purchase.html'
+    model = Purchase
+    template_name = 'inventory/purchase.html'
 
 
 class CreatePurchaseView(LoginRequiredMixin, CreateView):
@@ -392,8 +514,13 @@ class ShoppingList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         ingredients = Ingredient.objects.all()
-        shopping_list = [obj for obj in ingredients if obj.buy()]
-        return shopping_list
+        self.shopping_list = [obj for obj in ingredients if obj.buy()]
+        return self.shopping_list
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['basket'] = Basket.objects.all()
+        return context
 
 
 class OrphanIngredientView(LoginRequiredMixin, ListView):

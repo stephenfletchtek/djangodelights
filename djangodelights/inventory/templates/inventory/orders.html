@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+{% block content %}
+  <h1>
+    Shopping List Orders
+  </h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in object_list|dictsort:'order_number.id' %}
+        {% ifchanged %}
+          <tr>
+            <td>Order no.: {{ item.order_number.id }} -- {{ item.order_number.timestamp }}</td>
+          </tr>
+        {% endifchanged %}
+        <tr>
+          <td>{{ item.ingredient }}</td>
+          <td>{{ item.quantity }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

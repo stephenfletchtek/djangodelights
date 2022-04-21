@@ -11,124 +11,50 @@
     </div>
 
     <table class="menu-table">
-      <thead class="heading">
-        <tr>
-          <th><h2>Starters</h2></th>
-          <th>Profit</th>
-          <th>Price</th>
-          <th>Stock</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for menu_item in object_list %}
-          {% if menu_item.display and menu_item.category.category == 'Starters' %}
+      {% for menu_item in object_list|dictsort:'category.id' %}
+        {% ifchanged %}
+          <tbody class="heading">
             <tr>
-              <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
-              <td>£{{ menu_item.dish_profit }}</td>
-              <td>£{{ menu_item.price }}</td>
-              <td>{{ menu_item.available }}</td>
+              <td><h2>{{ menu_item.category.category }}</h2></td>
+              <td>{% if forloop.counter == 1 %}Profit{% endif %}</td>
+              <td>{% if forloop.counter == 1 %}Price{% endif %}</td>
+              <td>{% if forloop.counter == 1 %}Stock{% endif %}</td>
             </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
-
-      <tbody class="heading">
-        <tr>
-          <td><h2>Mains</h2></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-      </tbody>
-      <tbody>
-        {% for menu_item in object_list %}
-          {% if menu_item.display and menu_item.category.category == 'Mains' %}
-            <tr>
-              <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
-              <td>£{{ menu_item.dish_profit }}</td>
-              <td>£{{ menu_item.price }}</td>
-              <td>{{ menu_item.available }}</td>
-            </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
-
-      <tbody class="heading">
-        <tr>
-          <td><h2>Desserts</h2></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-      </tbody>
-      <tbody>
-        {% for menu_item in object_list %}
-          {% if menu_item.display and menu_item.category.category == 'Desserts' %}
-            <tr>
-              <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
-              <td>£{{ menu_item.dish_profit }}</td>
-              <td>£{{ menu_item.price }}</td>
-              <td>{{ menu_item.available }}</td>
-            </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
+          </tbody>
+        {% endifchanged %}
+        {% ifchanged %}<tbody>{% endifchanged %}
+          <tr>
+            <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
+            <td>£{{ menu_item.dish_profit }}</td>
+            <td>£{{ menu_item.price }}</td>
+            <td>{{ menu_item.available }}</td>
+          </tr>
+        {% ifchanged %}</tbody>{% endifchanged %}
+      {% endfor %}
     </table>
 
   {% else %}
-    <div class="container-grey">
-      <h2>Starters</h2>
-    </div>
     <table class="menu-table">
-      <tbody>
-        {% for menu_item in object_list %}
-          {% if menu_item.display and menu_item.category.category == 'Starters' %}
+      {% for menu_item in object_list|dictsort:'category.id' %}
+        {% ifchanged %}
+          <tbody class="heading">
             <tr>
-              <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
+              <td><h2>{{ menu_item.category.category }}</h2></td>
               <td></td>
               <td></td>
-              <td>{{ menu_item.price }}</td>
+              <td></td>
             </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <div class="container-grey">
-      <h2>Mains</h2>
-    </div>
-    <table class="menu-table">
-      <tbody>
-        {% for menu_item in object_list %}
-          {% if menu_item.display and menu_item.category.category == 'Mains' %}
-            <tr>
-              <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
-              <td></td>
-              <td></td>
-              <td>£{{ menu_item.price }}</td>
-            </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <div class="container-grey">
-      <h2>Desserts</h2>
-    </div>
-    <table class="menu-table">
-      <tbody>
-        {% for menu_item in object_list %}
-          {% if menu_item.display and menu_item.category.category == 'Desserts' %}
-            <tr>
-              <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
-              <td><div class="exclamation">!</div></td>
-              <td>Stockout</td>
-              <td>{{ menu_item.price }}</td>
-            </tr>
-          {% endif %}
-        {% endfor %}
-      </tbody>
+          </tbody>
+        {% endifchanged %}
+        {% ifchanged %}<tbody>{% endifchanged %}
+          <tr>
+            <td><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a></td>
+            <td>{% if menu_item.available == 0 %}<div class="exclamation">!</div>{% endif %}</td>
+            <td>{% if menu_item.available == 0 %}Stockout{% endif %}</td>
+            <td>{{ menu_item.price }}</td>
+          </tr>
+        {% ifchanged %}</tbody>{% endifchanged %}
+      {% endfor %}
     </table>
   {% endif %}
-
 {% endblock %}
