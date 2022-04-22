@@ -174,7 +174,13 @@ class Purchase(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    menu_item = models.ForeignKey(
+        MenuItem,
+        models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    menu_item_name = models.CharField(blank=True, max_length=200)
     timestamp = models.DateTimeField(default=timezone.now)
     quantity = models.PositiveIntegerField(
         default=1,
@@ -184,8 +190,13 @@ class Purchase(models.Model):
     def get_absolute_url(self):
         return reverse('purchases')
 
+    # clone title from menu_item object into CharField
+    def save(self, **kwargs):
+        self.menu_item_name = self.menu_item.title
+        super().save(**kwargs)
+
     def __str__(self):
-        return f'{self.id}: {self.menu_item}'
+        return f'{self.id}: {self.menu_item_name}'
 
 
 # use this model to hold the shopping basket

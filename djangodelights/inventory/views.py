@@ -33,23 +33,23 @@ class LogoutView(View):
 
 
 class HomeView(LoginRequiredMixin, TemplateView):
-  template_name = "inventory/home.html"
+    template_name = "inventory/home.html"
 
-  def get_context_data(self):
-    context = super().get_context_data()
-    context["menu"] = MenuItem.objects.all()
-    return context
+    def get_context_data(self):
+        context = super().get_context_data()
+        context["menu"] = MenuItem.objects.all()
+        return context
 
 
 class IngredientView(LoginRequiredMixin, ListView):
-  model = Ingredient
-  template_name = 'inventory/ingredient.html'
+    model = Ingredient
+    template_name = 'inventory/ingredient.html'
 
 
 class CreateIngredientView(LoginRequiredMixin, CreateView):
-  model = Ingredient
-  template_name = 'inventory/add_ingredient.html'
-  form_class = IngredientAddForm
+    model = Ingredient
+    template_name = 'inventory/add_ingredient.html'
+    form_class = IngredientAddForm
 
 
 class UpdateIngredientView(LoginRequiredMixin, UpdateView):
@@ -124,7 +124,6 @@ class UpdateMenuDetailsView(LoginRequiredMixin, FormView):
     model = Recipe
     template_name = 'inventory/edit_menu_details.html'
     form_class = UpdateMenuDetailsFormSet
-    # success_url = '/menu/'
 
     # have to do this when using formset
     def form_valid(self, form):
@@ -329,6 +328,7 @@ class DeletePurchaseView(LoginRequiredMixin, DeleteView):
     success_url = '/purchases'
 
     # increase stock if purchase is deleted
+    # *** THIS CANNOT WORK IF MENU_ITEM IS DELETED!!! ***
     def delete(self, *args, **kwargs):
         order = self.get_object()
         menu_item = order.menu_item

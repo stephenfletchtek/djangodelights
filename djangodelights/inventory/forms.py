@@ -126,11 +126,10 @@ class UpdateMenuDescriptionForm(forms.ModelForm):
 class PurchaseAddForm(forms.ModelForm):
     class Meta:
         model = Purchase
-        exclude = ["timestamp"]
+        fields = ['menu_item', 'quantity']
 
     # only list dishes available to purchase
     def __init__(self, **kwargs):
-        self.menu = MenuItem.objects.all()
         super().__init__(**kwargs)
         menu = MenuItem.objects.all()
         filter_list = [item.title for item in menu if item.available() > 0]
