@@ -185,7 +185,7 @@ class Purchase(models.Model):
         return reverse('purchases')
 
     def __str__(self):
-        return f'{self.menu_item}'
+        return f'{self.id}: {self.menu_item}'
 
 
 # use this model to hold the shopping basket

@@ -1,9 +1,0 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
-<h2>Update {{ object.menu_item.title }} Recipe</h2>
-<p>{{ object.ingredient.name }} quantity</p>
-<form method="post">
-  {% csrf_token %}
-  {{ form }}
-  <input type="submit" value="Update" />
-</form>
-{% endblock %}

@@ -7,20 +7,20 @@
 
   {% if user.is_staff %}
     <div class="add">
-      <a class="addbutton" href="{% url 'update_menu_display' %}">EDIT</a>
+      <a class="addbutton" href="{% url 'menu_edit' %}">EDIT</a>
     </div>
 
     <table class="menu-table">
       {% for menu_item in object_list|dictsort:'category.id' %}
         {% ifchanged %}
-          <tbody class="heading">
+          <thead class="heading">
             <tr>
               <td><h2>{{ menu_item.category.category }}</h2></td>
               <td>{% if forloop.counter == 1 %}Profit{% endif %}</td>
               <td>{% if forloop.counter == 1 %}Price{% endif %}</td>
               <td>{% if forloop.counter == 1 %}Stock{% endif %}</td>
             </tr>
-          </tbody>
+          </thead>
         {% endifchanged %}
         {% ifchanged %}<tbody>{% endifchanged %}
           <tr>
@@ -37,14 +37,14 @@
     <table class="menu-table">
       {% for menu_item in object_list|dictsort:'category.id' %}
         {% ifchanged %}
-          <tbody class="heading">
+          <thead class="heading">
             <tr>
               <td><h2>{{ menu_item.category.category }}</h2></td>
               <td></td>
               <td></td>
               <td></td>
             </tr>
-          </tbody>
+          </thead>
         {% endifchanged %}
         {% ifchanged %}<tbody>{% endifchanged %}
           <tr>
