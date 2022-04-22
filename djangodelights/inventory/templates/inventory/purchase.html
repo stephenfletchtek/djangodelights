@@ -21,7 +21,7 @@
       {% for item in object_list %}
         <tr>
           <td>{{ item.timestamp }}</td>
-          <td>{{ item.menu_item.title }}</td>
+          <td>{{ item.menu_item_name }}</td>
           <td><a href="{% url 'update_purchases' item.id %}">{{ item.quantity }}</a></td>
           <td><a class="delete-button" href="{% url 'delete_purchases' item.id %}">X</a></td>
         </tr>
