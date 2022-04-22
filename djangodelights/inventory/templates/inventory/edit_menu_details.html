@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Django Delights{% endblock %}
+{% block content %}
+
+  <h1>{{ menu_item.title }} Recipe</h1>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <ul>
+        <li class="breadcrumb"><a href="{% url 'menu' %}">Menu</a></li>
+        <li class="breadcrumb"><a href="{% url 'details' menu_item.title %}">{{ menu_item.title }}</a>
+        <li class="edit">
+          <div class="add">
+            <input class="addbutton" type="submit" value="Update" />
+          </div>
+        </li>
+      </ul>
+    </nav>
+    {{ form.management_form }}
+    <table class="menu-table">
+      <thead class="heading">
+        <tr>
+          <th>Ingredient</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>Unit Price</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in form %}
+          {{ item.id }}
+            <tr>
+              <td>{{ item.instance.ingredient.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.instance.ingredient.unit }}</td>
+              <td>£ {{ item.instance.ingredient.unit_price }}</td>
+              <td>{{ item.DELETE }}</td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a class="add-button" href="{% url 'create_recipe' menu_item.title %}">Add Ingredient</a>
+  </form>
+
+  <section>
+    <h2 class="detail">Description</h2>
+    <article><a href="{% url 'update_description' menu_item.title %}">{{ menu_item.description }}</a></article>
+  </section>
+
+{% endblock %}

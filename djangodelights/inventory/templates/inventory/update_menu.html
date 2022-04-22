@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <h1>Recipes</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="add">
+      <p>All recipes</p>
+      <input class="addbutton" type="submit" value="Update" />
+    </div>
+
+    <a class="add-button" href="{% url 'create_menu' %}">Add Menu Item</a>
+    {{ form.management_form }}
+    <table class="menu-table">
+      {% for item in form|dictsort:'instance.category.id' %}
+        {{ item.id }}
+        {% ifchanged %}
+          <thead class="heading">
+            <tr>
+              <th><h2>{{ item.instance.category.category }}</h2></th>
+              <th>{% if forloop.counter == 1 %}Profit{% endif %}</th>
+              <th>{% if forloop.counter == 1 %}Price{% endif %}</th>
+              <th>{% if forloop.counter == 1 %}Stock{% endif %}</th>
+              <th>{% if forloop.counter == 1 %}Stocked{% endif %}</th>
+              <th>{% if forloop.counter == 1 %}Display{% endif %}</th>
+            </tr>
+          </thead>
+        {% endifchanged %}
+        {% ifchanged %}<tbody>{% endifchanged %}
+          <tr>
+            <td>{{ item.title }}</td>
+            <td>{{ item.instance.dish_profit }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.instance.available }}</td>
+            <td>{{ item.stock_item }}</td>
+            <td>{{ item.display }}</td>
+          </tr>
+        {% ifchanged %}</tbody>{% endifchanged %}
+      {% endfor %}
+    </table>
+  </form>
+{% endblock %}

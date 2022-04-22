@@ -74,7 +74,11 @@ class MenuSelectForm(forms.ModelForm):
     #     self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
 
 
-DisplayFormset = modelformset_factory(MenuItem, fields=('stock_item','display',), extra=0)
+UpdateMenuFormSet = modelformset_factory(
+    MenuItem,
+    fields=('title', 'price', 'stock_item','display',),
+    extra=0
+)
 
 
 # only display 'in stock' ingredients in formset
@@ -94,25 +98,28 @@ class MenuAddForm(forms.ModelForm):
         fields = '__all__'
 
 
-# used to update description
-class MenuEditDescription(forms.ModelForm):
+# display recipe items linked to menu_item
+class BaseMenuDetailsFormSet(BaseModelFormSet):
+    def __init__(self, menu_item=None, **kwargs):
+        super().__init__(**kwargs)
+        self.queryset = Recipe.objects.filter(menu_item=menu_item)
+
+
+# update recipe item quantities or delete
+UpdateMenuDetailsFormSet = modelformset_factory(
+    Recipe,
+    fields=('quantity',),
+    formset=BaseMenuDetailsFormSet,
+    can_delete=True,
+    extra=0
+)
+
+
+# update menu_item details
+class UpdateMenuDescriptionForm(forms.ModelForm):
     class Meta:
         model = MenuItem
         fields = ["description"]
-
-
-# used to uodate menu name
-class MenuEditNameForm(forms.ModelForm):
-    class Meta:
-        model = MenuItem
-        fields = ["title"]
-
-
-# used to add menu item
-class MenuEditPriceForm(forms.ModelForm):
-    class Meta:
-        model = MenuItem
-        fields = ["price"]
 
 
 # used to add purchase item
@@ -176,10 +183,3 @@ class RecipeAddForm(forms.ModelForm):
         ingredients = Ingredient.objects.exclude(name__in=excludes)
         super().__init__(**kwargs)
         self.fields['ingredient'].queryset = ingredients
-
-
-# used to update recipe ingredient
-class RecipeEditForm(forms.ModelForm):
-    class Meta:
-        model = Recipe
-        fields = ["quantity"]

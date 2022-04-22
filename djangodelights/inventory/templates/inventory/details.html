@@ -11,7 +11,7 @@
       <li class="edit"><a href="{% url 'menu_item_edit' menu_item.title %}">Edit</a></li>
     </ul>
   </nav>
-  <a class="delete-button" href="{% url 'delete_menu' menu_item.title %}">❌</a>
+  <a class="delete-button" href="{% url 'delete_menu' menu_item.title %}">Delete {{ menu_item.title }}</a>
   <section>
     <h2 class="detail">Ingredients</h2>
     <article>

@@ -9,16 +9,14 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-# from django.views.generic.edit import FormMixin
-
-from .forms import MenuAddForm, MenuEditNameForm, MenuEditPriceForm
-from .forms import MenuEditDescription, MenuSelectForm
+from .forms import MenuAddForm
+from .forms import UpdateMenuDescriptionForm, MenuSelectForm
 from .forms import IngredientAddForm, IngredientEditForm
 from .forms import AddForm, BasketAddForm, BasketUpdateForm, EditBasketFormset
 from .forms import PurchaseAddForm, PurchaseEditForm
-from .forms import RecipeAddForm, RecipeEditForm
-from .forms import DisplayFormset, UpdateStockFormset
-from .forms import CreateOrderForm
+from .forms import RecipeAddForm
+from .forms import UpdateMenuFormSet, UpdateStockFormset
+from .forms import CreateOrderForm, UpdateMenuDetailsFormSet
 from .models import Basket, MenuItem, Ingredient, Recipe, Purchase, OrderNumber, Order
 
 
@@ -67,15 +65,15 @@ class UpdateIngredientView(LoginRequiredMixin, UpdateView):
 
 
 class DeleteIngredientView(LoginRequiredMixin, DeleteView):
-  model = Ingredient
-  template_name = 'inventory/delete_ingredient.html'
-  success_url = '/stock/ingredients/'
+    model = Ingredient
+    template_name = 'inventory/delete_ingredient.html'
+    success_url = '/stock/ingredients/'
 
-  # overriding get_object() means no need to slug_the_url_conf
-  def get_object(self, queryset=None):
-      name = self.kwargs['name']
-      ingredient = get_object_or_404(Ingredient, name=name)
-      return ingredient
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        name = self.kwargs['name']
+        ingredient = get_object_or_404(Ingredient, name=name)
+        return ingredient
 
 
 class MenuView(LoginRequiredMixin, ListView):
@@ -91,23 +89,23 @@ class CreateMenuView(LoginRequiredMixin, CreateView):
     success_url = '/menu/displayupdate/'
 
 
-class UpdateMenuDisplayView(LoginRequiredMixin, FormView):
+class UpdateMenuView(LoginRequiredMixin, FormView):
     model = MenuItem
-    template_name = 'inventory/update_menu_display.html'
-    form_class = DisplayFormset
-    success_url = '/menu'
+    template_name = 'inventory/update_menu.html'
+    form_class = UpdateMenuFormSet
 
     def form_valid(self, form):
         self.object = form.save()
-        return HttpResponseRedirect(self.success_url)
+        return super().form_valid(form)
+
+    def get_success_url(self, **kwargs):
+        return reverse('menu')
 
 
-# tacks on menu description edit to recipe view (admin use)
 class UpdateMenuDescriptionView(LoginRequiredMixin, UpdateView):
     model = MenuItem
     template_name = 'inventory/update_menu_description.html'
-    form_class = MenuEditDescription
-    success_url = '/menu/'
+    form_class = UpdateMenuDescriptionForm
 
     # overriding get_object() means no need to slug_the_url_conf
     def get_object(self, queryset=None):
@@ -115,41 +113,50 @@ class UpdateMenuDescriptionView(LoginRequiredMixin, UpdateView):
         menu_item = get_object_or_404(MenuItem, title=title)
         return menu_item
 
+    # kwarg in success_url
+    def get_success_url(self, **kwargs):
+        menu_item = self.kwargs['menu_item']
+        return reverse('menu_item_edit', kwargs={'menu_item': menu_item})
+
+
+# formset menu_item details
+class UpdateMenuDetailsView(LoginRequiredMixin, FormView):
+    model = Recipe
+    template_name = 'inventory/edit_menu_details.html'
+    form_class = UpdateMenuDetailsFormSet
+    # success_url = '/menu/'
+
+    # have to do this when using formset
     def form_valid(self, form):
-        try:
-            result = self.success_url + self.kwargs['menu_item']
-        except:
-            result = self.success_url
+        form.save(commit=False)
+        for obj in form.deleted_objects:
+            obj.delete()
+        form.save()
+        return super().form_valid(form)
 
-        self.object = form.save()
-        return HttpResponseRedirect(result)
-
+    # put menu_item into context
     def get_context_data(self, **kwargs):
         title = self.kwargs['menu_item']
         menu_item = get_object_or_404(MenuItem, title=title)
-        recipes = Recipe.objects.filter(menu_item__title=title)
         context = super().get_context_data(**kwargs)
         context['menu_item'] = menu_item
-        context['recipes'] = recipes
         return context
 
-
-class UpdateMenuNameView(LoginRequiredMixin, UpdateView):
-    model = MenuItem
-    template_name = 'inventory/update_menu_name.html'
-    form_class = MenuEditNameForm
-
-
-class UpdateMenuPriceView(LoginRequiredMixin, UpdateView):
-    model = MenuItem
-    template_name = 'inventory/update_menu_price.html'
-    form_class = MenuEditPriceForm
+    # put menu_item object into form kwargs
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'menu_item': self.get_object()})
+        return kwargs
 
     # overriding get_object() means no need to slug_the_url_conf
     def get_object(self, queryset=None):
         title = self.kwargs['menu_item']
         menu_item = get_object_or_404(MenuItem, title=title)
         return menu_item
+
+    def get_success_url(self, **kwargs):
+        menu_item = self.kwargs['menu_item']
+        return reverse('details', kwargs={'menu_item': menu_item})
 
 
 class DeleteMenuView(LoginRequiredMixin, DeleteView):
@@ -337,7 +344,7 @@ class DeletePurchaseView(LoginRequiredMixin, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class Details(LoginRequiredMixin, ListView):
+class MenuDetailsView(LoginRequiredMixin, ListView):
     model = Recipe
     template_name = "inventory/details.html"
 
@@ -376,44 +383,6 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['menu_item'] = self.kwargs['menu_item']
         return context
-
-
-class UpdateRecipeView(LoginRequiredMixin, UpdateView):
-    model = Recipe
-    template_name = 'inventory/update_recipe.html'
-    form_class = RecipeEditForm
-
-    # overriding get_object() means no need to slug_the_url_conf
-    def get_object(self, queryset=None):
-        name = self.kwargs['ingredient']
-        ingredient = get_object_or_404(Ingredient, name=name)
-        title = self.kwargs['menu_item']
-        menu_item = get_object_or_404(MenuItem, title=title)
-        recipe = get_object_or_404(
-            Recipe, menu_item=menu_item, ingredient=ingredient
-            )
-        return recipe
-
-
-# Delete recipe will cause associated orders to delete
-# But it won't increment stock
-class DeleteRecipeView(LoginRequiredMixin, DeleteView):
-    model = Recipe
-    template_name = 'inventory/delete_recipe.html'
-
-    # overriding get_object() means no need to slug_the_url_conf
-    def get_object(self, queryset=None):
-        name = self.kwargs['ingredient']
-        ingredient = get_object_or_404(Ingredient, name=name)
-        title = self.kwargs['menu_item']
-        menu_item = get_object_or_404(MenuItem, title=title)
-        recipe = get_object_or_404(
-            Recipe, menu_item=menu_item, ingredient=ingredient
-            )
-        return recipe
-
-    def get_success_url(self, **kwargs):
-        return self.object.get_absolute_url()
 
 
 class SalesProfitView(LoginRequiredMixin, TemplateView):
@@ -493,9 +462,10 @@ class UpdateStockView(LoginRequiredMixin, FormView):
     form_class = UpdateStockFormset
     success_url = '/stock/currentstock/'
 
+    # have to to this with formset
     def form_valid(self, form):
-        self.object = form.save()
-        return HttpResponseRedirect(self.success_url)
+        form.save()
+        return super().form_valid(form)
 
 
 class StockedRecipes(LoginRequiredMixin, ListView):
