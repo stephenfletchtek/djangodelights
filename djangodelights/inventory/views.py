@@ -81,6 +81,10 @@ class MenuView(LoginRequiredMixin, ListView):
     template_name = 'inventory/menu.html'
     form_class = MenuSelectForm
 
+    # only display dishes marked for display
+    def get_queryset(self):
+        return MenuItem.objects.filter(display=True)
+
 
 class CreateMenuView(LoginRequiredMixin, CreateView):
     model = MenuItem
