@@ -8,10 +8,14 @@
   <nav aria-label="Breadcrumb" class="breadcrumb">
     <ul>
       <li class="breadcrumb"><a href="{% url 'menu' %}">Menu</a></li>
-      <li class="edit"><a href="{% url 'menu_item_edit' menu_item.title %}">Edit</a></li>
+      {% if user.is_staff %}
+        <li class="edit"><a href="{% url 'menu_item_edit' menu_item.title %}">Edit</a></li>
+      {% endif %}
     </ul>
   </nav>
-  <a class="delete-button" href="{% url 'delete_menu' menu_item.title %}">Delete {{ menu_item.title }}</a>
+  {% if user.is_staff %}
+    <a class="delete-button" href="{% url 'delete_menu' menu_item.title %}">Delete {{ menu_item.title }}</a>
+  {% endif %}
   <section>
     <h2 class="detail">Ingredients</h2>
     <article>
