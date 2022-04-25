@@ -86,7 +86,9 @@ class CreateMenuView(LoginRequiredMixin, CreateView):
     model = MenuItem
     template_name = 'inventory/add_menu.html'
     form_class = MenuAddForm
-    success_url = '/menu/displayupdate/'
+
+    def get_success_url(self, **kwargs):
+        return reverse('menu')
 
 
 class UpdateMenuView(LoginRequiredMixin, FormView):
@@ -325,23 +327,23 @@ class UpdatePurchaseView(LoginRequiredMixin, UpdateView):
 class DeletePurchaseView(LoginRequiredMixin, DeleteView):
     model = Purchase
     template_name = 'inventory/delete_purchase.html'
-    success_url = '/purchases'
 
     # increase stock if purchase is deleted
-    # *** THIS CANNOT WORK IF MENU_ITEM IS DELETED!!! ***
     def delete(self, *args, **kwargs):
-        order = self.get_object()
-        menu_item = order.menu_item
-        delta = order.quantity
-        if self.restock:
-            menu_item.adjust_stock(delta)
+        purchase_obj = self.get_object()
+        # only adjust quantity of menu_item exists and 'restock' is checked
+        if purchase_obj.menu_item and self.restock:
+            purchase_obj.menu_item.adjust_stock(purchase_obj.quantity)
         return super().delete(*args, **kwargs)
 
     # grab restock checkbox from form
     def post(self, request, *args, **kwargs):
         self.restock = request.POST.get('restock')
         self.delete(self)
-        return HttpResponseRedirect(self.success_url)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self, **kwargs):
+        return reverse('purchases')
 
 
 class MenuDetailsView(LoginRequiredMixin, ListView):
