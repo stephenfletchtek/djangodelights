@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import F, Sum
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.urls import reverse
 
@@ -30,20 +31,22 @@ class Ingredient(models.Model):
     threshold = models.IntegerField(blank=True, null=True)
     re_order = models.IntegerField(blank=True, null=True)
 
-    # Returns reorder quantity if kanban is true and stock is below threshold
+    # Returns reorder quantity less basket quantity
+    # if kanban is true and stock is below threshold
     def buy(self):
         if self.kanban and self.quantity < self.threshold:
-            return self.re_order
+            return self.re_order - self.in_basket()
         else:
             return 0
 
-    # return 'True' if item is in the basket
+    # return basket quantity if item is in the basket else zero
     def in_basket(self):
         ingredients = [obj.ingredient for obj in Basket.objects.all()]
         if self in ingredients:
-            return True
+            basket = get_object_or_404(Basket, ingredient=self)
+            return basket.quantity
         else:
-            return False
+            return 0
 
     # return 'True' if it's not in a recipe
     def no_recipe(self):

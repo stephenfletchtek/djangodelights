@@ -21,7 +21,7 @@ class BasketAddForm(forms.ModelForm):
 
     def __init__(self, ingredient_obj=None, **kwargs):
         super().__init__(**kwargs)
-        self.initial['quantity'] = ingredient_obj.re_order
+        self.initial['quantity'] = ingredient_obj.buy()
 
 
 # Add in item from restock list to basket as an update
@@ -32,7 +32,7 @@ class BasketUpdateForm(forms.ModelForm):
 
     def __init__(self, basket_obj=None, **kwargs):
         super().__init__(**kwargs)
-        self.initial['quantity'] = basket_obj.ingredient.re_order
+        self.initial['quantity'] = basket_obj.ingredient.buy()
 
 
 # Edit basket

@@ -14,25 +14,30 @@
       <tr>
         <th>Item</th>
         <th>Stock</th>
+        <th>In Basket</th>
         <th>To buy</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       {% for item in object_list %}
-        <tr>
-          <td>{{ item.name }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>{{ item.re_order }}</td>
-          {% comment %} Use 'add' if item is not in basket or 'update' if it is {% endcomment %}
-          <td><a
-            {% if item.in_basket %}
-              href="{% url 'update_basket' item.name %}"
-            {% else %}
-              href="{% url 'add_to_basket' item.name %}"
-            {% endif %}>Add to basket</a>
-          </td>
-        </tr>
+        {% if item.in_basket < item.re_order %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.in_basket }}</td>
+            <td>{{ item.buy }}</td>
+            <td>
+              {% comment %} Messy 'create_or_update' {% endcomment %}
+              <a
+              {% if item.in_basket %}
+                href="{% url 'update_basket' item.name %}"
+              {% else %}
+                href="{% url 'add_to_basket' item.name %}"
+              {% endif %}>Add to basket</a>
+            </td>
+          </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>
