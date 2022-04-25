@@ -223,6 +223,10 @@ class Basket(models.Model):
     def __str__(self):
         return f'{self.ingredient}'
 
+###############################################################################
+# OrderNumber and Order is clumsy approach where many-to-many for ingredients #
+# in a single order would be better. But it works OK as a fisrt go!           #
+###############################################################################
 
 # create a unique order number(id) and timestamp for use with Orders
 class OrderNumber(models.Model):
@@ -240,13 +244,16 @@ class OrderNumber(models.Model):
         order_number = OrderNumber.objects.latest('id')
         basket = Basket.objects.all()
         for item in basket:
+            # copy basket contents into Order
             Order.objects.create(
                 order_number=order_number,
-                ingredient=item.ingredient,
+                ingredient_name=item.ingredient.name,
                 quantity=item.quantity
             )
+            # increment stock
             item.ingredient.quantity += item.quantity
             item.ingredient.save()
+            # remove from basket
             item.delete()
 
     def get_absolute_url(self):
@@ -262,7 +269,7 @@ class Order(models.Model):
         ordering = ['order_number']
 
     order_number = models.ForeignKey(OrderNumber, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, blank=True, null=True, on_delete=models.CASCADE)
+    ingredient_name = models.CharField(blank=True, max_length=200)
     quantity = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)]
@@ -272,4 +279,4 @@ class Order(models.Model):
         return reverse('shopping_list')
 
     def __str__(self):
-        return f'{self.order_number} -- {self.ingredient}'
+        return f'{self.id} -- {self.ingredient_name}'
