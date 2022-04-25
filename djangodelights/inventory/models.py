@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import F, Sum
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.urls import reverse
 
@@ -30,20 +31,22 @@ class Ingredient(models.Model):
     threshold = models.IntegerField(blank=True, null=True)
     re_order = models.IntegerField(blank=True, null=True)
 
-    # Returns reorder quantity if kanban is true and stock is below threshold
+    # Returns reorder quantity less basket quantity
+    # if kanban is true and stock is below threshold
     def buy(self):
         if self.kanban and self.quantity < self.threshold:
-            return self.re_order
+            return self.re_order - self.in_basket()
         else:
             return 0
 
-    # return 'True' if item is in the basket
+    # return basket quantity if item is in the basket else zero
     def in_basket(self):
         ingredients = [obj.ingredient for obj in Basket.objects.all()]
         if self in ingredients:
-            return True
+            basket = get_object_or_404(Basket, ingredient=self)
+            return basket.quantity
         else:
-            return False
+            return 0
 
     # return 'True' if it's not in a recipe
     def no_recipe(self):
@@ -223,6 +226,10 @@ class Basket(models.Model):
     def __str__(self):
         return f'{self.ingredient}'
 
+###############################################################################
+# OrderNumber and Order is clumsy approach where many-to-many for ingredients #
+# in a single order would be better. But it works OK as a fisrt go!           #
+###############################################################################
 
 # create a unique order number(id) and timestamp for use with Orders
 class OrderNumber(models.Model):
@@ -240,13 +247,16 @@ class OrderNumber(models.Model):
         order_number = OrderNumber.objects.latest('id')
         basket = Basket.objects.all()
         for item in basket:
+            # copy basket contents into Order
             Order.objects.create(
                 order_number=order_number,
-                ingredient=item.ingredient,
+                ingredient_name=item.ingredient.name,
                 quantity=item.quantity
             )
+            # increment stock
             item.ingredient.quantity += item.quantity
             item.ingredient.save()
+            # remove from basket
             item.delete()
 
     def get_absolute_url(self):
@@ -262,7 +272,7 @@ class Order(models.Model):
         ordering = ['order_number']
 
     order_number = models.ForeignKey(OrderNumber, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, blank=True, null=True, on_delete=models.CASCADE)
+    ingredient_name = models.CharField(blank=True, max_length=200)
     quantity = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)]
@@ -272,4 +282,4 @@ class Order(models.Model):
         return reverse('shopping_list')
 
     def __str__(self):
-        return f'{self.order_number} -- {self.ingredient}'
+        return f'{self.id} -- {self.ingredient_name}'

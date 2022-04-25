@@ -6,7 +6,6 @@
   <h1>Basket</h1>
   <ul>
     <li><a href="{% url 'shopping_list' %}">Shopping List</a></li>
-    <li><a href="{% url 'add_any' %}">Add item</a></li>
   </ul>
   <table>
     <thead>
@@ -25,6 +24,7 @@
     </tbody>
   </table>
   <ul>
+    <li><a href="{% url 'add_any' %}">Add item</a></li>
     <li><a href="{% url 'edit_basket' %}">Edit Basket</a></li>
     <li><a href="{% url 'create_order' %}">Create Order</a></li>
   </ul>
