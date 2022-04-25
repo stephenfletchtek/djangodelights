@@ -10,7 +10,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from .forms import MenuAddForm
-from .forms import UpdateMenuDescriptionForm, MenuSelectForm
+from .forms import UpdateMenuDescriptionForm
 from .forms import IngredientAddForm, IngredientEditForm
 from .forms import AddForm, BasketAddForm, BasketUpdateForm, EditBasketFormset
 from .forms import PurchaseAddForm, PurchaseEditForm
@@ -79,7 +79,6 @@ class DeleteIngredientView(LoginRequiredMixin, DeleteView):
 class MenuView(LoginRequiredMixin, ListView):
     model = MenuItem
     template_name = 'inventory/menu.html'
-    form_class = MenuSelectForm
 
     # only display dishes marked for display
     def get_queryset(self):
