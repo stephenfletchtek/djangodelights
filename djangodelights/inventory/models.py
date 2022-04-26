@@ -17,6 +17,14 @@ class Category(models.Model):
         return f'{self.id} -- {self.category}'
 
 
+# provide a list of table numbers for incorporation into customer orders
+class Table(models.Model):
+    table_num = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'Table: {self.table_num}'
+
+
 class Ingredient(models.Model):
     class Meta:
         ordering = ['name']
@@ -170,6 +178,31 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient.name} from {self.menu_item.title}'
+
+
+# unique table & timestamp 'order number'
+# can assign a TableOrder to a Purchase object
+class TableOrder(models.Model):
+    class Meta:
+        ordering = ['-timestamp']
+
+    timestamp = models.DateTimeField(default=timezone.now)
+    table = models.ForeignKey(
+        Table,
+        models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    table_num = models.PositiveIntegerField()
+
+    # clone table_num from Table object into CharField
+    # this is so table number is preserved even in Table object is deleted
+    def save(self, **kwargs):
+        self.table_num = self.table.table_num
+        super().save(**kwargs)
+
+    def __str__(self):
+        return f'{table_num} -- {timestamp}'
 
 
 # used to store customer purchases from the menu
