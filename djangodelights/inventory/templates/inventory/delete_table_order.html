@@ -1,0 +1,17 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<h2>Delete Customer Order</h2>
+<form method="post">
+  {% csrf_token %}
+  <p>Are you sure you want to delete "Table {{ object.table_num }}"</p>
+  <p>Timestamp: "{{ object.timestamp }}"?</p>
+{% comment %}
+  {% if object.menu_item %}
+    <div class="restock">
+      <input class="restock-input" type="checkbox" value="True" id="restock" name="restock">
+      <label class="restock-label" for="restock">Restock on delete</label>
+    </div>
+  {% endif %}
+{% endcomment %}
+  <input type="submit" value="Confirm" />
+</form>
+{% endblock %}

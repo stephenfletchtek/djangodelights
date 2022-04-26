@@ -17,7 +17,9 @@ from .forms import PurchaseAddForm, PurchaseEditForm
 from .forms import RecipeAddForm
 from .forms import UpdateMenuFormSet, UpdateStockFormset
 from .forms import CreateOrderForm, UpdateMenuDetailsFormSet
+from .forms import TableOrderAddForm
 from .models import Basket, MenuItem, Ingredient, Recipe, Purchase, OrderNumber, Order
+from .models import TableOrder
 
 
 class SignUp(CreateView):
@@ -512,3 +514,25 @@ class OrphanIngredientView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['no_recipe'] = self.no_recipe
         return context
+
+
+############################################
+# These three views handle customer orders #
+############################################
+class TableOrderView(LoginRequiredMixin, ListView):
+    model = TableOrder
+    template_name = 'inventory/table_order.html'
+
+
+class CreateTableOrderView(LoginRequiredMixin, CreateView):
+    model = TableOrder
+    template_name = 'inventory/add_table_order.html'
+    form_class = TableOrderAddForm
+
+
+class DeleteTableOrderView(LoginRequiredMixin, DeleteView):
+    model = TableOrder
+    template_name = 'inventory/delete_table_order.html'
+
+    def get_success_url(self):
+        return reverse('table_order')

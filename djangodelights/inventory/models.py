@@ -204,8 +204,11 @@ class TableOrder(models.Model):
         self.table_num = self.table.table_num
         super().save(**kwargs)
 
+    def get_absolute_url(self):
+        return reverse('table_order')
+
     def __str__(self):
-        return f'{table_num} -- {timestamp}'
+        return f'Table:{table_num} -- {timestamp}'
 
 
 # used to store customer purchases from the menu

@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory, BaseModelFormSet
 
 from .models import Basket, Ingredient, MenuItem, Recipe, Purchase, OrderNumber, Order
-
+from .models import TableOrder
 
 # Add any item to basket
 class AddForm(forms.ModelForm):
@@ -188,3 +188,12 @@ class RecipeAddForm(forms.ModelForm):
         ingredients = Ingredient.objects.exclude(name__in=excludes)
         super().__init__(**kwargs)
         self.fields['ingredient'].queryset = ingredients
+
+
+###########################
+# Adding a customer order #
+###########################
+class TableOrderAddForm(forms.ModelForm):
+    class Meta:
+        model = TableOrder
+        fields = ['timestamp', 'table']
