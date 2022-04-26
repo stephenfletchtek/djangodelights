@@ -19,6 +19,9 @@ class Category(models.Model):
 
 # provide a list of table numbers for incorporation into customer orders
 class Table(models.Model):
+    class Meta:
+        ordering = ['table_num']
+
     table_num = models.PositiveIntegerField()
 
     def __str__(self):
