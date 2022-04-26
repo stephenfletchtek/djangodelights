@@ -208,7 +208,7 @@ class TableOrder(models.Model):
         return reverse('table_order')
 
     def __str__(self):
-        return f'Table:{table_num} -- {timestamp}'
+        return f'Table: {self.table_num} -- {self.timestamp}'
 
 
 # used to store customer purchases from the menu
