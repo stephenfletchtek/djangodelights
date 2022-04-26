@@ -63,21 +63,22 @@ class IngredientEditForm(forms.ModelForm):
         ]
 
 
-class MenuSelectForm(forms.ModelForm):
-    class Meta:
-        model = MenuItem
-        fields = ['display']
-
-    # makes it auto validate on tick box
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
+# class MenuSelectForm(forms.ModelForm):
+#     class Meta:
+#         model = MenuItem
+#         fields = ['display']
+#
+#     # makes it auto validate on tick box
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
 
 
 UpdateMenuFormSet = modelformset_factory(
     MenuItem,
     fields=('title', 'price', 'stock_item','display',),
-    extra=0
+    extra=0,
+    # widgets={'display': forms.CheckboxInput(attrs={'onchange': 'submit();'})}
 )
 
 
@@ -88,7 +89,12 @@ class BaseStockFormSet(BaseModelFormSet):
         self.queryset = Ingredient.objects.filter(quantity__gt=0)
 
 
-UpdateStockFormset = modelformset_factory(Ingredient, fields=('quantity',), formset=BaseStockFormSet, extra=0)
+UpdateStockFormset = modelformset_factory(
+    Ingredient,
+    fields=('quantity',),
+    formset=BaseStockFormSet,
+    extra=0
+)
 
 
 # used to add menu item
