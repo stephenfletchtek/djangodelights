@@ -297,24 +297,57 @@ class CreateOrderView(LoginRequiredMixin, CreateView):
     form_class = CreateOrderForm
 
 
+#################################
+# Customer orders in restuarant #
+#################################
+# view purchases in a particular table_order
 class PurchaseView(LoginRequiredMixin, ListView):
     model = Purchase
     template_name = 'inventory/purchase.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['table_order'] = self.get_object()
+        return context
 
+    def get_object(self):
+        return get_object_or_404(TableOrder, id=self.kwargs['pk'])
+
+    def get_queryset(self):
+        return Purchase.objects.filter(table_order=self.get_object())
+
+
+# Create Purchase objects and fill in table_order field
 class CreatePurchaseView(LoginRequiredMixin, CreateView):
     model = Purchase
     template_name = 'inventory/add_purchase.html'
     form_class = PurchaseAddForm
 
-    # decrease stock when purchase is added
     def form_valid(self, form):
-        menu_item = form.instance.menu_item
-        delta = -form.instance.quantity
-        success = menu_item.adjust_stock(delta)
+        # add table_order
+        table_order = get_object_or_404(TableOrder, id=self.kwargs['pk'])
+        form.instance.table_order = table_order
+        # decrease stock
+        form.instance.menu_item.adjust_stock(-form.instance.quantity)
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table_order = get_object_or_404(TableOrder, id=self.kwargs['pk'])
+        context['table_order'] = table_order
+        return context
 
+    # put table_order into form kwargs
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'table_order': self.kwargs['pk']})
+        return kwargs
+
+    def get_success_url(self):
+        return reverse('purchases', args=[str(self.kwargs['pk'])])
+
+
+# allow quantity of purchase item to be changed
 class UpdatePurchaseView(LoginRequiredMixin, UpdateView):
     model = Purchase
     template_name = 'inventory/update_purchase.html'
@@ -322,11 +355,16 @@ class UpdatePurchaseView(LoginRequiredMixin, UpdateView):
 
     # adjust stock up or down by difference between form and model
     def form_valid(self, form):
-        order = self.get_object()
-        menu_item = order.menu_item
-        delta = order.quantity - form.instance.quantity
-        menu_item.adjust_stock(delta)
+        delta = self.get_object().quantity - form.instance.quantity
+        self.get_object().menu_item.adjust_stock(delta)
         return super().form_valid(form)
+
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        return get_object_or_404(Purchase, id=self.kwargs['menuitem'])
+
+    def get_success_url(self):
+        return reverse('purchases', args=[str(self.kwargs['order'])])
 
 
 class DeletePurchaseView(LoginRequiredMixin, DeleteView):
@@ -341,16 +379,23 @@ class DeletePurchaseView(LoginRequiredMixin, DeleteView):
             purchase_obj.menu_item.adjust_stock(purchase_obj.quantity)
         return super().delete(*args, **kwargs)
 
-    # grab restock checkbox from form
-    def post(self, request, *args, **kwargs):
-        self.restock = request.POST.get('restock')
-        self.delete(self)
-        return HttpResponseRedirect(self.get_success_url())
+    # overriding get_object() means no need to slug_the_url_conf
+    def get_object(self, queryset=None):
+        return get_object_or_404(Purchase, id=self.kwargs['menuitem'])
 
     def get_success_url(self, **kwargs):
-        return reverse('purchases')
+        return reverse('purchases', args=[str(self.kwargs['order'])])
+
+    # grab restock checkbox from form
+    def post(self, request, *args, **kwargs):
+        # call get_success_url() before the object is deleted
+        url = self.get_success_url()
+        self.restock = request.POST.get('restock')
+        self.delete(self)
+        return HttpResponseRedirect(url)
 
 
+######################################
 class MenuDetailsView(LoginRequiredMixin, ListView):
     model = Recipe
     template_name = "inventory/details.html"
