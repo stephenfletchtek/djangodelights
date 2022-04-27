@@ -39,4 +39,7 @@ urlpatterns = [
     path('stock/ingredients/orphans/', views.OrphanIngredientView.as_view(), name='orphans'),
     path('stock/orders', views.OrderView.as_view(), name='orders'),
     path('stock/orders/add/', views.CreateOrderView.as_view(), name='create_order'),
+    path('customerorders', views.TableOrderView.as_view(), name='table_order'),
+    path('customerorders/add/', views.CreateTableOrderView.as_view(), name='create_table_order'),
+    path('customerorders/delete/<pk>', views.DeleteTableOrderView.as_view(), name='delete_table_order')
 ]

@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory, BaseModelFormSet
 
 from .models import Basket, Ingredient, MenuItem, Recipe, Purchase, OrderNumber, Order
-
+from .models import TableOrder
 
 # Add any item to basket
 class AddForm(forms.ModelForm):
@@ -63,21 +63,22 @@ class IngredientEditForm(forms.ModelForm):
         ]
 
 
-class MenuSelectForm(forms.ModelForm):
-    class Meta:
-        model = MenuItem
-        fields = ['display']
-
-    # makes it auto validate on tick box
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
+# class MenuSelectForm(forms.ModelForm):
+#     class Meta:
+#         model = MenuItem
+#         fields = ['display']
+#
+#     # makes it auto validate on tick box
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['display'].widget.attrs.update({'onchange': 'submit();'})
 
 
 UpdateMenuFormSet = modelformset_factory(
     MenuItem,
     fields=('title', 'price', 'stock_item','display',),
-    extra=0
+    extra=0,
+    # widgets={'display': forms.CheckboxInput(attrs={'onchange': 'submit();'})}
 )
 
 
@@ -88,7 +89,12 @@ class BaseStockFormSet(BaseModelFormSet):
         self.queryset = Ingredient.objects.filter(quantity__gt=0)
 
 
-UpdateStockFormset = modelformset_factory(Ingredient, fields=('quantity',), formset=BaseStockFormSet, extra=0)
+UpdateStockFormset = modelformset_factory(
+    Ingredient,
+    fields=('quantity',),
+    formset=BaseStockFormSet,
+    extra=0
+)
 
 
 # used to add menu item
@@ -182,3 +188,12 @@ class RecipeAddForm(forms.ModelForm):
         ingredients = Ingredient.objects.exclude(name__in=excludes)
         super().__init__(**kwargs)
         self.fields['ingredient'].queryset = ingredients
+
+
+###########################
+# Adding a customer order #
+###########################
+class TableOrderAddForm(forms.ModelForm):
+    class Meta:
+        model = TableOrder
+        fields = ['timestamp', 'table']
