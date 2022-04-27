@@ -128,6 +128,9 @@ class UpdateMenuDescriptionForm(forms.ModelForm):
         fields = ["description"]
 
 
+############################################
+# Add and update menu_items on table_order #
+############################################
 # used to add purchase item
 class PurchaseAddForm(forms.ModelForm):
     class Meta:
@@ -135,11 +138,15 @@ class PurchaseAddForm(forms.ModelForm):
         fields = ['menu_item', 'quantity']
 
     # only list dishes available to purchase
-    def __init__(self, **kwargs):
+    def __init__(self, table_order=None, **kwargs):
+        # exclude objects already on the order
+        purchase = Purchase.objects.filter(table_order__id=table_order)
+        excl_list = [item.menu_item.id for item in purchase]
+        menu = MenuItem.objects.exclude(id__in=excl_list)
+        # list items in stock
+        filter_list = [item.id for item in menu if item.available() > 0]
+        in_stock = MenuItem.objects.filter(id__in=filter_list)
         super().__init__(**kwargs)
-        menu = MenuItem.objects.all()
-        filter_list = [item.title for item in menu if item.available() > 0]
-        in_stock = MenuItem.objects.filter(title__in=filter_list)
         self.fields['menu_item'].queryset = in_stock
 
     # cleaned quantity must not be > available
@@ -153,7 +160,6 @@ class PurchaseAddForm(forms.ModelForm):
             raise ValidationError(message)
             data = 0
         return data
-
 
 # used to update purchase item
 class PurchaseEditForm(forms.ModelForm):
