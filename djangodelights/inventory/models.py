@@ -214,8 +214,9 @@ class TableOrder(models.Model):
 # used to store customer purchases from the menu
 class Purchase(models.Model):
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ['menu_item_name']
 
+    table_order = models.ForeignKey(TableOrder, null=True, on_delete=models.CASCADE)
     menu_item = models.ForeignKey(
         MenuItem,
         models.SET_NULL,
@@ -223,7 +224,6 @@ class Purchase(models.Model):
         null=True
     )
     menu_item_name = models.CharField(blank=True, max_length=200)
-    timestamp = models.DateTimeField(default=timezone.now)
     quantity = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)]

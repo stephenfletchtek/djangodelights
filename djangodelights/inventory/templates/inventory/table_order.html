@@ -22,7 +22,7 @@
         <tr>
           <td>{{ item.timestamp }}</td>
           <td>{{ item.table_num }}</td>
-          <td><a>Details</a></td>
+          <td><a href="{% url 'purchases' item.id %}">Details</a></td>
           <td><a class="delete-button" href="{% url 'delete_table_order' item.id %}">X</a></td>
         </tr>
       {% endfor %}
