@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
-<h2>Add Purchase</h2>
+<h2>Add to Table {{ table_order.table_num }}</h2>
 <form method="post">
   <div>
     {% csrf_token %}

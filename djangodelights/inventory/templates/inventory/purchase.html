@@ -2,16 +2,15 @@
 {% load static %}
 {% block title %}Django Delights{% endblock %}
 {% block content %}
-  <h1>
-    Orders
-  </h1>
+  <h1>Table {{ table_order.table_num }} details</h1>
   <div class="add">
-    <button class="addbutton"><a href="{% url 'create_purchases' %}">ADD</a></button>
+    <button class="addbutton"><a href="{% url 'create_purchases' table_order.id %}">ADD</a></button>
   </div>
+  <a href="{% url 'table_order' %}">Customer Orders<a>
+  <p>Timestamp: {{ table_order.timestamp }}</p>
   <table class="order-table">
     <thead>
       <tr>
-        <th>Time stamp</th>
         <th>Item</th>
         <th>Qty</th>
         <th>Remove</th>
@@ -20,10 +19,9 @@
     <tbody>
       {% for item in object_list %}
         <tr>
-          <td>{{ item.timestamp }}</td>
           <td>{{ item.menu_item_name }}</td>
-          <td><a href="{% url 'update_purchases' item.id %}">{{ item.quantity }}</a></td>
-          <td><a class="delete-button" href="{% url 'delete_purchases' item.id %}">X</a></td>
+          <td><a href="{% url 'update_purchases' table_order.id item.id %}">{{ item.quantity }}</a></td>
+          <td><a class="delete-button" href="{% url 'delete_purchases' table_order.id item.id %}">X</a></td>
         </tr>
       {% endfor %}
     </tbody>
