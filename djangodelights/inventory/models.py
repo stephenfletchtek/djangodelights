@@ -38,9 +38,9 @@ class Ingredient(models.Model):
     unit_price = models.DecimalField(
         blank=True, null=True, max_digits=6, decimal_places=3
     )
-    kanban = models.BooleanField(default=False)
-    threshold = models.IntegerField(blank=True, null=True)
-    re_order = models.IntegerField(blank=True, null=True)
+    kanban = models.BooleanField(default=False, verbose_name='Reorder')
+    threshold = models.IntegerField(blank=True, null=True, verbose_name='Reorder Threshold')
+    re_order = models.IntegerField(blank=True, null=True, verbose_name='Reorder Quantity')
 
     # Returns reorder quantity less basket quantity
     # if kanban is true and stock is below threshold
